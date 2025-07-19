@@ -174,11 +174,11 @@ const Example: React.FC = () => {
               initialM={m}
               colorMode={colorMode}
               sensitivity={sensitivity}
-              showControls={false}
+              showControls={true}
               useWebGL={true}
-              particleDensity={isHighPerformanceDevice() ? 'high' : 'medium'}
-              useOffscreenCanvas={isHighPerformanceDevice()}
-              useWorker={isHighPerformanceDevice()}
+              particleDensity={'ultra'}
+              useOffscreenCanvas={false}
+              useWorker={false}
               fpsLimit={60}
               beatDetected={beatDetected}
             />
@@ -397,6 +397,53 @@ const Example: React.FC = () => {
                     </p>
                   </div>
                 )}
+              </div>
+            </div>
+          )}
+          
+          {/* System Status Panel - Only visible in optimized mode */}
+          {renderMode === 'optimized' && (
+            <div className="industrial-module">
+              <div className="industrial-module-header">
+                <span className="industrial-module-title">Estado del Sistema</span>
+              </div>
+              <div className="industrial-module-content">
+                <div className="industrial-status-bar">
+                  <span className="industrial-status-item">
+                    <span className="industrial-status-label">PARTICLES:</span>
+                    <span className="industrial-status-value">50.000</span>
+                  </span>
+                  <span className="industrial-status-item">
+                    <span className="industrial-status-label">RENDER:</span>
+                    <span className="industrial-status-value">GL</span>
+                  </span>
+                  <span className="industrial-status-item">
+                    <span className="industrial-status-label">FPS:</span>
+                    <span className="industrial-status-value">60</span>
+                  </span>
+                </div>
+                
+                <div className="industrial-status-bar industrial-mt-sm">
+                  <span className="industrial-status-item">
+                    <span className="industrial-status-label">AUDIO:</span>
+                    <span className={`industrial-led ${audioResponsive ? 'industrial-led-on' : ''}`}></span>
+                  </span>
+                  <span className="industrial-status-item">
+                    <span className="industrial-status-label">BEAT:</span>
+                    <span className={`industrial-led ${beatDetected ? 'industrial-led-on industrial-pulse' : ''}`}></span>
+                  </span>
+                  <span className="industrial-status-item">
+                    <span className="industrial-status-label">OFFSCREEN:</span>
+                    <span className="industrial-led"></span>
+                  </span>
+                </div>
+                
+                <div className="industrial-mt-md">
+                  <p className="industrial-data-label">Modo: {renderMode.toUpperCase()}</p>
+                  <p className="industrial-data-label">Densidad: ULTRA (50.000 partículas)</p>
+                  <p className="industrial-data-label">WebGL: ACTIVO</p>
+                  <p className="industrial-data-label">Worker: INACTIVO</p>
+                </div>
               </div>
             </div>
           )}

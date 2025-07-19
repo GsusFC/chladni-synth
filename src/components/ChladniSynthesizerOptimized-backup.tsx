@@ -63,7 +63,6 @@ const ChladniSynthesizerOptimized: React.FC<ChladniSynthesizerOptimizedProps> = 
     beatDetected = false
   } = props;
 
-  // Referencias principales
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const audioDataRef = useRef<AudioData | null>(null);
@@ -88,7 +87,6 @@ const ChladniSynthesizerOptimized: React.FC<ChladniSynthesizerOptimizedProps> = 
   useEffect(() => {
     isOffscreenSupported.current = typeof OffscreenCanvas !== 'undefined';
   }, []);
-
   const particlesRef = useRef<Particle[]>([]);
   const chladniParamsRef = useRef<ChladniParams>({ n: initialN, m: initialM });
   const frameCountRef = useRef(0);
@@ -297,7 +295,7 @@ const ChladniSynthesizerOptimized: React.FC<ChladniSynthesizerOptimizedProps> = 
   // Convertir datos de frecuencia a color (WebGL - retorna array RGBA)
   const getColorFromFrequencyWebGL = (value: number, max: number): [number, number, number, number] => {
     const normalizedValue = Math.min(value / max, 1);
-    const alpha = particleOpacity;
+    const alpha = 0.8;
 
     let r = 1, g = 1, b = 1;
 
@@ -474,26 +472,53 @@ const ChladniSynthesizerOptimized: React.FC<ChladniSynthesizerOptimizedProps> = 
       setIsPlaying(false);
     }
   };
+  /* ------------------------------------------------------------------
+     INITIALISATION:  create particles, set up resize, start loop
+  -------------------------------------------------------------------*/
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-  // Inicializar entrada de micrófono
-  const initMicrophoneInput = async () => {
-    try {
-      if (!audioContextRef.current || !audioDataRef.current) return;
-      
-      // Detener fuente anterior si existe
-      if (audioDataRef.current.source) {
-        audioDataRef.current.source.disconnect();
-      }
-      
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const source = audioContextRef.current.createMediaStreamSource(stream);
-      source.connect(audioDataRef.current.analyzer);
-      audioDataRef.current.source = source;
-    } catch (error) {
-      console.error("Error accediendo al micrófono:", error);
+    /* ---------- minimal WebGL init (optional) ---------- */
+    if (useWebGL && !glRef.current) {
+      initWebGL(canvas);
     }
-  };
 
+    /* ---------- initial particles ---------- */
+    createParticles();
+
+    /* ---------- resize handling ---------- */
+    const resizeCanvas = () => {
+      const rect = canvas.getBoundingClientRect();
+      const dpr  = window.devicePixelRatio || 1;
+      canvas.width  = rect.width  * dpr;
+      canvas.height = rect.height * dpr;
+      if (glRef.current) glRef.current.viewport(0, 0, canvas.width, canvas.height);
+    };
+    resizeCanvas();
+    const ro = new ResizeObserver(resizeCanvas);
+    ro.observe(canvas);
+
+    /* ---------- start render loop ---------- */
+    lastFrameTimeRef.current = performance.now();
+    renderFrame();
+
+    /* ---------- cleanup ---------- */
+    return () => {
+      ro.disconnect();
+      if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
+      if (audioContextRef.current)  audioContextRef.current.close();
+    };
+  }, [createParticles, renderFrame, useWebGL]);
+
+  /* ------------------------------------------------------------------
+     RENDER ONLY THE CANVAS – controls live elsewhere
+  -------------------------------------------------------------------*/
+  return (
+    <div className="industrial-chladni-container">
+      <canvas ref={canvasRef} className="industrial-canvas" />
+    </div>
+  );
   // Manejar archivo de audio
   const handleAudioFile = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -831,33 +856,55 @@ const ChladniSynthesizerOptimized: React.FC<ChladniSynthesizerOptimizedProps> = 
     });
     
     ctx.restore();
-  }, [isPlaying, audioSource, sensitivityState, particleSize, particleOpacity, selectedColorMode, autoShuffle, fpsLimit, beatDetected, useWebGL, useWorker]);
+  }, [isPlaying, audioSource, sensitivityState, particleSize, particleOpacity, selectedColorMode, autoShuffle, fpsLimit, beatDetected]);
 
-  // Efecto para inicialización
+  // Efecto de inicialización
   useEffect(() => {
+    // Configurar canvas
     const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    // Inicializar WebGL si está habilitado
-    if (useWebGL && !glRef.current) {
-      initWebGL(canvas);
-    }
-
-    // Crear partículas iniciales
-    createParticles();
-
-    // Configurar redimensionamiento
+      // Intentar inicializar Worker con OffscreenCanvas primero (solo si ambos están habilitados)
+      if (useWorker && useOffscreenCanvas && isOffscreenSupported.current) {
+        const workerInitialized = initWorker();
     const resizeCanvas = () => {
       const rect = canvas.getBoundingClientRect();
       const dpr = window.devicePixelRatio || 1;
       
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
+      let width = rect.width;
+      let height = rect.height;
       
+      // Asegurar dimensiones mínimas
+      if (width < 100) width = canvas.parentElement?.offsetWidth || 800;
+      if (height < 100) height = canvas.parentElement?.offsetHeight || 600;
+      
+      // Actualizar tamaño del canvas
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+
       // Configurar contexto según el modo de renderizado
-      if (useWebGL && glRef.current) {
+      if (useWorker && workerRef.current) {
+        // Enviar resize al worker
+        workerRef.current.postMessage({
+          type: 'resize',
+          data: {
+            width: canvas.width,
+            height: canvas.height
+          }
+        });
+      } else if (useWebGL && glRef.current) {
+        // WebGL viewport
         glRef.current.viewport(0, 0, canvas.width, canvas.height);
+      } else if (useOffscreenCanvas && isOffscreenSupported.current && !useWorker) {
+        // OffscreenCanvas sin worker
+        if (offscreenCanvasRef.current) {
+          offscreenCanvasRef.current.width = canvas.width;
+          offscreenCanvasRef.current.height = canvas.height;
+
+          if (glRef.current) {
+            glRef.current.viewport(0, 0, canvas.width, canvas.height);
+          }
+        }
       } else {
+        // Canvas 2D scaling
         const ctx = canvas.getContext('2d');
         if (ctx) {
           ctx.scale(dpr, dpr);
@@ -865,45 +912,50 @@ const ChladniSynthesizerOptimized: React.FC<ChladniSynthesizerOptimizedProps> = 
       }
     };
     
-    // Aplicar redimensionamiento inicial
-    resizeCanvas();
-    
     // Observador de redimensionamiento
-    const resizeObserver = new ResizeObserver(() => resizeCanvas());
+    const resizeObserver = new ResizeObserver(entries => {
+      if (!entries || entries.length === 0) return;
+      resizeCanvas();
+    });
+    
+    // Forzar redimensionamiento inicial
+    setTimeout(resizeCanvas, 0);
+    
     resizeObserver.observe(canvas);
     if (canvas.parentElement) {
       resizeObserver.observe(canvas.parentElement);
     }
     
+    setupCanvas();
+    
     // Iniciar bucle de animación
     lastFrameTimeRef.current = performance.now();
     renderFrame();
     
-    // Limpieza
     return () => {
       resizeObserver.disconnect();
-      
+
       if (animationFrameId.current) {
         cancelAnimationFrame(animationFrameId.current);
       }
-      
+
       // Limpiar Web Worker
       if (workerRef.current) {
         workerRef.current.postMessage({ type: 'stop' });
         workerRef.current.terminate();
         workerRef.current = null;
       }
-      
+
       // Limpiar recursos de audio
       if (audioDataRef.current && audioDataRef.current.source) {
         audioDataRef.current.source.disconnect();
       }
-      
+
       if (audioContextRef.current) {
         audioContextRef.current.close();
       }
     };
-  }, [createParticles, renderFrame, useWebGL, useWorker]);
+  }, [createParticles, renderFrame]);
   
   // Efecto para detección de beat
   useEffect(() => {
@@ -922,9 +974,213 @@ const ChladniSynthesizerOptimized: React.FC<ChladniSynthesizerOptimizedProps> = 
     updateWorkerParams();
   }, [nParam, mParam]);
 
+  // Debug: verificar showControls
+  console.log('ChladniSynthesizerOptimized showControls:', showControls);
+
   return (
     <div className="industrial-chladni-container">
       <canvas ref={canvasRef} className="industrial-canvas" />
+
+      {/* Controles superpuestos */}
+      {showControls && (
+        <div className="industrial-module industrial-overlay">
+          <div className="industrial-module-header">
+            <span className="industrial-module-title">Controles Chladni</span>
+          </div>
+          <div className="industrial-module-content">
+            {/* Controles de audio */}
+            <div className="industrial-flex industrial-justify-between industrial-mb-md">
+              <button 
+                className="industrial-button"
+                onClick={toggleAudio}
+              >
+                <span className={`industrial-icon ${isPlaying ? 'industrial-icon-stop' : 'industrial-icon-play'}`}></span>
+                {isPlaying ? 'Detener Audio' : 'Iniciar Audio'}
+              </button>
+              
+              <div className="industrial-radio-group">
+                <label className="industrial-radio-label">
+                  <input 
+                    type="radio" 
+                    className="industrial-radio"
+                    checked={audioSource === 'microphone'} 
+                    onChange={() => handleSourceChange('microphone')} 
+                  />
+                  <span>Micrófono</span>
+                </label>
+                <label className="industrial-radio-label">
+                  <input 
+                    type="radio" 
+                    className="industrial-radio"
+                    checked={audioSource === 'file'} 
+                    onChange={() => handleSourceChange('file')} 
+                  />
+                  <span>Archivo</span>
+                </label>
+              </div>
+            </div>
+            
+            {audioSource === 'file' && (
+              <div className="industrial-file-input-container industrial-mb-md">
+                <input 
+                  type="file" 
+                  id="audio-file" 
+                  accept="audio/*" 
+                  onChange={handleAudioFile} 
+                  className="industrial-file-input" 
+                />
+                <label htmlFor="audio-file" className="industrial-button">
+                  <span className="industrial-icon industrial-icon-upload"></span>
+                  Seleccionar Audio
+                </label>
+              </div>
+            )}
+            
+            {/* Control de sensibilidad */}
+            <div className="industrial-flex industrial-items-center industrial-gap-sm industrial-mb-md">
+              <span className="industrial-label">SENS:</span>
+              <div className="industrial-flex-grow">
+                <input 
+                  type="range" 
+                  min="1" 
+                  max="100" 
+                  value={sensitivityState} 
+                  onChange={(e) => setSensitivity(parseInt(e.target.value))}
+                  className="industrial-fader-horizontal"
+                />
+              </div>
+              <span className="industrial-value">{sensitivityState}%</span>
+            </div>
+            
+            {/* Parámetros Chladni */}
+            <div className="industrial-data-grid industrial-mb-md">
+              <div className="industrial-data-row">
+                <span className="industrial-data-label">N:</span>
+                <input 
+                  type="number" 
+                  min="1" 
+                  max={RAND_NM} 
+                  value={nParam} 
+                  onChange={(e) => handleParamChange('n', parseInt(e.target.value))}
+                  className="industrial-input industrial-w-16"
+                />
+                
+                <span className="industrial-data-label industrial-ml-md">M:</span>
+                <input 
+                  type="number" 
+                  min="1" 
+                  max={RAND_NM} 
+                  value={mParam} 
+                  onChange={(e) => handleParamChange('m', parseInt(e.target.value))}
+                  className="industrial-input industrial-w-16"
+                />
+                
+                <button 
+                  onClick={shuffle}
+                  className="industrial-button industrial-ml-md"
+                >
+                  <span className="industrial-icon industrial-icon-random"></span>
+                  Aleatorio
+                </button>
+              </div>
+            </div>
+            
+            {/* Checkbox para auto shuffle */}
+            <div className="industrial-flex industrial-items-center industrial-mb-md">
+              <label className="industrial-checkbox-label">
+                <input 
+                  type="checkbox" 
+                  className="industrial-checkbox"
+                  checked={autoShuffle} 
+                  onChange={(e) => setAutoShuffle(e.target.checked)} 
+                />
+                <span>Auto Shuffle</span>
+              </label>
+            </div>
+            
+            {/* Controles visuales */}
+            <div className="industrial-flex industrial-items-center industrial-gap-sm industrial-mb-md">
+              <span className="industrial-label">COLOR:</span>
+              <select 
+                value={selectedColorMode} 
+                onChange={(e) => setSelectedColorMode(e.target.value)}
+                className="industrial-select"
+              >
+                <option value="spectrum">Espectro</option>
+                <option value="amplitude">Amplitud</option>
+                <option value="frequency">Bandas de Frecuencia</option>
+              </select>
+            </div>
+            
+            <div className="industrial-flex industrial-items-center industrial-gap-sm industrial-mb-md">
+              <span className="industrial-label">TAMAÑO:</span>
+              <div className="industrial-flex-grow">
+                <input 
+                  type="range" 
+                  min="1" 
+                  max="5" 
+                  step="0.5"
+                  value={particleSize} 
+                  onChange={(e) => setParticleSize(parseFloat(e.target.value))}
+                  className="industrial-fader-horizontal"
+                />
+              </div>
+              <span className="industrial-value">{particleSize}</span>
+            </div>
+            
+            <div className="industrial-flex industrial-items-center industrial-gap-sm">
+              <span className="industrial-label">OPACIDAD:</span>
+              <div className="industrial-flex-grow">
+                <input 
+                  type="range" 
+                  min="0.1" 
+                  max="1" 
+                  step="0.1"
+                  value={particleOpacity} 
+                  onChange={(e) => setParticleOpacity(parseFloat(e.target.value))}
+                  className="industrial-fader-horizontal"
+                />
+              </div>
+              <span className="industrial-value">{particleOpacity.toFixed(1)}</span>
+            </div>
+            
+            {/* Información de rendimiento */}
+            <div className="industrial-status-bar industrial-mt-md">
+              <span className="industrial-status-item">
+                <span className="industrial-status-label">FPS:</span>
+                <span className="industrial-status-value">{actualFPS}</span>
+              </span>
+              <span className="industrial-status-item">
+                <span className="industrial-status-label">PART:</span>
+                <span className="industrial-status-value">{PARTICLE_DENSITY[particleDensity].toLocaleString()}</span>
+              </span>
+              <span className="industrial-status-item">
+                <span className="industrial-status-label">AUDIO:</span>
+                <span className={`industrial-led ${isPlaying ? 'industrial-led-on' : ''}`}></span>
+              </span>
+              <span className="industrial-status-item">
+                <span className="industrial-status-label">BEAT:</span>
+                <span className={`industrial-led ${beatDetected ? 'industrial-led-on industrial-pulse' : ''}`}></span>
+              </span>
+              <span className="industrial-status-item">
+                <span className="industrial-status-label">RENDER:</span>
+                <span className="industrial-status-value">
+                  {useWorker && workerRef.current ? 'WRK' :
+                   useWebGL && glRef.current ? 'GL' : '2D'}
+                </span>
+              </span>
+              <span className="industrial-status-item">
+                <span className="industrial-status-label">OFFSCREEN:</span>
+                <span className={`industrial-led ${useOffscreenCanvas && isOffscreenSupported.current ? 'industrial-led-on' : ''}`}></span>
+              </span>
+              <span className="industrial-status-item">
+                <span className="industrial-status-label">PARTICLES:</span>
+                <span className="industrial-status-value">{PARTICLE_DENSITY[particleDensity].toLocaleString()}</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
