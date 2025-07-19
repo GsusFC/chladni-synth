@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Sintetizador Visual Chladni - Visualización interactiva de patrones de Chladni reaccionando a audio en tiempo real" />
+    <meta name="theme-color" content="#121212" />
+    
+    <title>Chladni Visual Synthesizer</title>
+    
+    <!-- Favicon -->
+    <!--  Los archivos dentro de /public se sirven en la raíz con Vite  -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    
+    <!-- Preload system fonts -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <!-- Prevent FOUC (Flash of Unstyled Content) -->
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background-color: #121212;
+        color: white;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      }
+      
+      #root {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+      
+      .loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        text-align: center;
+        padding: 20px;
+      }
+      
+      .loading h1 {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(45deg, #3f51b5, #00bcd4);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      
+      .loading p {
+        max-width: 600px;
+        margin: 0 auto;
+        opacity: 0.7;
+      }
+      
+      .browser-warning {
+        background-color: rgba(255, 0, 0, 0.1);
+        border-left: 4px solid #ff5252;
+        padding: 10px 15px;
+        margin-top: 20px;
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <!-- Loading state until React hydrates -->
+      <div class="loading">
+        <h1>Sintetizador Visual Chladni</h1>
+        <p>Cargando visualizaciones de patrones Chladni...</p>
+        <div id="browser-warning" class="browser-warning">
+          Tu navegador podría no soportar todas las características necesarias (WebGL, WebAudio, etc.).
+          Para una mejor experiencia, usa Chrome, Firefox o Edge actualizados.
+        </div>
+      </div>
+    </div>
+    
+    <!-- Feature detection -->
+    <script>
+      // Check for WebGL
+      function hasWebGL() {
+        try {
+          const canvas = document.createElement('canvas');
+          return !!(window.WebGLRenderingContext && 
+            (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+        } catch(e) {
+          return false;
+        }
+      }
+      
+      // Check for Web Audio API
+      function hasWebAudio() {
+        return !!(window.AudioContext || window.webkitAudioContext);
+      }
+      
+      // Show warning if features are missing
+      if (!hasWebGL() || !hasWebAudio()) {
+        document.getElementById('browser-warning').style.display = 'block';
+      }
+    </script>
+    
+    <!-- Entry point for the React application -->
+    <script type="module" src="/src/index.tsx"></script>
+  </body>
+</html>

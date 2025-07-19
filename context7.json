@@ -1,0 +1,40 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "projectTitle": "Chladni Visual Synthesizer",
+  "description": "Sintetizador visual interactivo que genera patrones de Chladni en tiempo real, reaccionando al audio del micrófono o archivos de audio. Utiliza React, TypeScript, Web Audio API, Canvas 2D y WebGL.",
+  "folders": [
+    "src",
+    "docs",
+    "public"
+  ],
+  "excludeFolders": [
+    "node_modules",
+    "dist",
+    "build",
+    ".git",
+    ".vscode",
+    "coverage"
+  ],
+  "excludeFiles": [
+    "package-lock.json",
+    "yarn.lock",
+    "pnpm-lock.yaml",
+    ".gitignore",
+    ".eslintrc.js",
+    ".prettierrc",
+    "tsconfig.json",
+    "vite.config.ts"
+  ],
+  "rules": [
+    "Usar React con TypeScript para todos los componentes",
+    "Implementar Web Audio API para análisis de audio en tiempo real",
+    "Usar Canvas 2D para renderizado básico y WebGL para alto rendimiento",
+    "Aplicar patrones matemáticos de Chladni: sin(nπx/a) * sin(mπy/b)",
+    "Optimizar rendimiento con OffscreenCanvas y Web Workers cuando sea posible",
+    "Mantener compatibilidad con diferentes dispositivos y navegadores",
+    "Usar Vite como bundler y herramienta de desarrollo",
+    "Implementar controles interactivos para parámetros n, m, sensibilidad y modo de color",
+    "Proporcionar tanto modo básico como optimizado para diferentes capacidades de hardware"
+  ],
+  "previousVersions": []
+}
