@@ -1,0 +1,39 @@
+{
+  "name": "chladni-synth",
+  "version": "1.0.0",
+  "description": "Sintetizador Visual Chladni - Visualización interactiva de patrones de Chladni reaccionando a audio en tiempo real",
+  "main": "src/index.tsx",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "type-check": "tsc --noEmit",
+    "context7": "npx @upstash/context7-mcp",
+    "context7:test": "npx @modelcontextprotocol/inspector npx @upstash/context7-mcp",
+    "context7:docs": "echo 'Context7 está configurado para este proyecto. Usa \"use context7\" en tus prompts para obtener documentación actualizada.'"
+  },
+  "keywords": [
+    "chladni",
+    "audio",
+    "visualization",
+    "react",
+    "webgl",
+    "canvas"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.5.0",
+    "@types/react": "^18.2.15",
+    "@types/react-dom": "^18.2.7",
+    "@upstash/context7-mcp": "^1.0.14",
+    "@vitejs/plugin-react": "^4.0.3",
+    "typescript": "^5.0.4",
+    "vite": "^4.4.5"
+  }
+}

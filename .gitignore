@@ -1,0 +1,63 @@
+# Dependencias
+node_modules/
+/.pnp
+.pnp.js
+
+# Testing
+/coverage
+
+# Producción y build
+/dist
+/build
+/dist-ssr
+*.local
+
+# Archivos de entorno
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Editor y sistema
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Caché
+.eslintcache
+.cache
+.parcel-cache
+.npm
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# Vite específico
+.vite/
+
+# Archivos temporales
+.temp
+.tmp
+.history

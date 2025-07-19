@@ -1,0 +1,1107 @@
+/* styles-industrial.css - Industrial/Technical UI for Chladni Visual Synthesizer */
+
+/* ========== RESET & BASE STYLES ========== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Consolas', monospace;
+}
+
+body {
+  background-color: #000000;
+  color: #FFFFFF;
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+/* ========== COLOR SYSTEM ========== */
+:root {
+  --color-background: #000000;
+  --color-background-module: #111111;
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #999999;
+  --color-text-tertiary: #666666;
+  --color-accent: #FF6B35;
+  --color-accent-hover: #FF8C5A;
+  --color-accent-active: #E55A2B;
+  --color-border: #222222;
+  --color-border-light: #333333;
+  --color-success: #2ECC71;
+  --color-warning: #F39C12;
+  --color-error: #E74C3C;
+  
+  /* Spacing system */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  
+  /* Typography */
+  --font-size-xs: 10px;
+  --font-size-sm: 12px;
+  --font-size-md: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 18px;
+  
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s ease;
+  
+  /* Shadows */
+  --shadow-subtle: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-medium: 0 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* ========== LAYOUT STRUCTURE ========== */
+.industrial-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-background);
+}
+
+.industrial-header {
+  background-color: var(--color-background);
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-md);
+}
+
+.industrial-title {
+  text-align: center;
+  font-size: var(--font-size-xl);
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.industrial-main {
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+  overflow: hidden;
+}
+
+.industrial-visualization {
+  width: 70%;
+  height: 100%;
+  position: relative;
+  background-color: var(--color-background);
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+}
+
+.industrial-controls {
+  width: 30%;
+  overflow-y: auto;
+  background-color: var(--color-background);
+  padding: var(--space-md);
+}
+
+.industrial-footer {
+  background-color: var(--color-background);
+  border-top: 1px solid var(--color-border);
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-sm);
+  display: flex;
+  justify-content: space-between;
+  color: var(--color-text-tertiary);
+}
+
+/* ========== HARDWARE MODULES ========== */
+.industrial-module {
+  border: 1px solid var(--color-border);
+  background-color: var(--color-background-module);
+  margin-bottom: var(--space-lg);
+  position: relative;
+}
+
+.industrial-module-header {
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-sm);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--color-background);
+}
+
+/* Header toggle container for audio-responsive mode */
+.industrial-module-header .industrial-flex {
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+/* Compact label specifically for header toggles */
+.industrial-module-header .industrial-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-right: 0;
+}
+
+/* Smaller toggle button for module headers */
+.industrial-module-header .industrial-button {
+  padding: var(--space-xs) var(--space-sm);
+  min-width: 40px;
+  height: 24px;
+  font-size: var(--font-size-xs);
+}
+
+.industrial-module-title {
+  font-size: var(--font-size-sm);
+  font-weight: bold;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.industrial-module-content {
+  padding: var(--space-md);
+}
+
+/* ========== BUTTONS & CONTROLS ========== */
+.industrial-button {
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-light);
+  padding: var(--space-sm) var(--space-md);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+}
+
+.industrial-button:hover {
+  background-color: var(--color-border);
+}
+
+.industrial-button:active {
+  transform: translateY(1px);
+}
+
+.industrial-button-primary {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.industrial-button-primary:hover {
+  background-color: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+}
+
+.industrial-button-active {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-text-primary);
+}
+
+.industrial-button-group {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+/* ========== TABS SYSTEM ========== */
+.industrial-tabs-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.industrial-tabs-list {
+  position: relative;
+  display: flex;
+  gap: var(--space-sm);
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* full width distributes remaining space */
+.industrial-tabs-fullwidth .industrial-tab {
+  flex: 1 1 0;
+}
+
+/* orientation vertical */
+.industrial-tabs-vertical {
+  flex-direction: row;
+}
+
+.industrial-tabs-vertical .industrial-tabs-list {
+  flex-direction: column;
+  border-bottom: none;
+  border-right: 1px solid var(--color-border);
+}
+
+/* tab sizes */
+.industrial-tabs-small .industrial-tab { padding: var(--space-xs) var(--space-sm); font-size: var(--font-size-xs); }
+.industrial-tabs-large .industrial-tab { padding: var(--space-md) var(--space-lg); font-size: var(--font-size-lg); }
+
+.industrial-tab {
+  position: relative;
+  background-color: var(--color-background);
+  color: var(--color-text-secondary);
+  border: 1px solid transparent;
+  border-bottom: 2px solid transparent;
+  padding: var(--space-sm) var(--space-md);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: color var(--transition-fast), background-color var(--transition-fast);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.industrial-tab:hover:not(.industrial-tab-disabled) {
+  background-color: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.industrial-tab-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.industrial-tab-active {
+  color: var(--color-text-primary);
+  border-color: var(--color-border-light);
+  border-bottom: 2px solid var(--color-accent);
+}
+
+/* Active indicator (animated underline) */
+.industrial-tabs-indicator {
+  position: absolute;
+  bottom: 0;
+  height: 2px;
+  background-color: var(--color-accent);
+  transition: transform var(--transition-normal), width var(--transition-normal);
+}
+
+/* Content wrapper */
+.industrial-tab-content {
+  padding: var(--space-md) 0;
+}
+
+/* ======================================================================
+   NEW: ONE-LINE HEADER LAYOUT HELPERS
+   ====================================================================== */
+
+/* Row that hosts both tab groups */
+.industrial-tabs-row {
+  display: flex;
+  justify-content: center;        /* keep whole set centred */
+  align-items: flex-start;
+  gap: var(--space-lg);           /* space between groups and separator */
+  flex-wrap: wrap;                /* fall-back on small screens */
+  margin-top: var(--space-sm);
+}
+
+/* Each logical group of tabs */
+.industrial-tabs-group {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+/* Thin vertical separator between the two groups */
+.industrial-tabs-separator {
+  width: 1px;
+  height: 24px;
+  background-color: var(--color-border-light);
+  align-self: center;
+}
+
+/* Compact audio indicator area under the tab row */
+.industrial-audio-indicator {
+  margin-top: var(--space-sm);
+  display: flex;
+  justify-content: center;
+}
+
+/* ------------------------------------------------------------------
+   CUSTOM  H O R I Z O N T A L   F A D E R  (Reusable component)
+   ------------------------------------------------------------------ */
+
+/* Wrapper so we can place label, track and value inline */
+.industrial-horizontal-fader-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  user-select: none;
+  width: 100%; /* asegúrate de que el track pueda crecer */
+}
+
+/* Valor mostrado encima del track centrado y con espaciado sutil */
+.industrial-horizontal-fader-container .industrial-fader-value {
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-xs);
+}
+
+/* Contenedor de min-max debajo del track */
+.industrial-horizontal-fader-container .industrial-flex {
+  justify-content: space-between;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+/* Track bar */
+.industrial-fader-track-horizontal {
+  position: relative;
+  height: 8px;
+  background: var(--color-border);
+  border-radius: 2px;
+  cursor: pointer;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Thumb re-uses .industrial-fader-thumb
+   but orient horizontally via translateY */
+.industrial-fader-track-horizontal .industrial-fader-thumb {
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Filled-value bar */
+.industrial-fader-value-line-horizontal {
+  position: absolute;
+  height: 100%;
+  left: 0;
+  background-color: var(--color-accent);
+  pointer-events: none;
+}
+
+/* Disabled state */
+.industrial-fader-disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* Tick marks for horizontal fader (override vertical defaults) */
+.industrial-fader-track-horizontal .industrial-fader-tick {
+  width: 1px;
+  height: 8px;
+  left: auto;
+  top: -2px;
+  transform: translateX(-50%);
+}
+
+/* ========== CUSTOM VERTICAL FADERS ========== */
+.industrial-fader-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: var(--space-md) 0;
+  position: relative;
+}
+
+.industrial-fader-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-xs);
+  align-self: flex-start;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.industrial-fader-value {
+  font-size: var(--font-size-md);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-sm);
+  font-weight: bold;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 1px;
+}
+
+/* Track for custom vertical fader */
+.industrial-fader-track {
+  position: relative;
+  width: 8px;
+  height: 120px;
+  background: var(--color-border);
+  cursor: pointer;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Draggable thumb for custom fader */
+.industrial-fader-thumb {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background-color: var(--color-accent);
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: grab;
+  box-shadow: var(--shadow-subtle);
+  transition: background-color var(--transition-fast);
+  z-index: 2;
+}
+
+.industrial-fader-thumb:hover {
+  background-color: var(--color-accent-hover);
+}
+
+.industrial-fader-thumb:active {
+  cursor: grabbing;
+  background-color: var(--color-accent-active);
+}
+
+/* Tick marks for fader */
+.industrial-fader-tick {
+  position: absolute;
+  width: 12px;
+  height: 1px;
+  background-color: var(--color-text-tertiary);
+  left: -2px;
+  z-index: 1;
+}
+
+/* Value indicator line */
+.industrial-fader-value-line {
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background-color: var(--color-accent);
+  left: 0;
+  z-index: 1;
+}
+
+/* Horizontal fader (for special cases) */
+.industrial-fader-horizontal {
+  width: 100%;
+  height: 8px;
+  position: relative;
+  background: var(--color-border);
+  cursor: pointer;
+  margin: var(--space-md) 0;
+}
+
+.industrial-fader-horizontal .industrial-fader-thumb {
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.industrial-fader-horizontal .industrial-fader-tick {
+  width: 1px;
+  height: 12px;
+  left: auto;
+  top: -2px;
+}
+
+/* ========== ICON SYSTEM ========== */
+.industrial-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* Play icon */
+.industrial-icon-play::before {
+  content: '';
+  width: 0;
+  height: 0;
+  border-top: 6px solid transparent;
+  border-left: 10px solid var(--color-text-primary);
+  border-bottom: 6px solid transparent;
+}
+
+/* Pause icon */
+.industrial-icon-pause {
+  display: inline-flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 16px;
+}
+
+.industrial-icon-pause::before,
+.industrial-icon-pause::after {
+  content: '';
+  width: 4px;
+  height: 12px;
+  background-color: var(--color-text-primary);
+}
+
+/* Stop icon */
+.industrial-icon-stop::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  background-color: var(--color-text-primary);
+}
+
+/* Record icon */
+.industrial-icon-record::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  background-color: var(--color-error);
+  border-radius: 0; /* Square for industrial style */
+}
+
+/* =====================================================
+   EXTRA ICONS (random, reset, save, load, delete, export, upload)
+   ===================================================== */
+
+/* Random (two crossing arrows) */
+.industrial-icon-random::before,
+.industrial-icon-random::after {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 2px;
+  background-color: var(--color-text-primary);
+  top: 7px;
+  left: 3px;
+}
+.industrial-icon-random::before {
+  transform: rotate(45deg);
+}
+.industrial-icon-random::after {
+  transform: rotate(-45deg);
+}
+
+/* Reset (circular arrow – quarter arc + arrow head) */
+.industrial-icon-reset::before,
+.industrial-icon-reset::after {
+  content: '';
+  position: absolute;
+  background-color: var(--color-text-primary);
+}
+.industrial-icon-reset::before {
+  width: 8px;
+  height: 8px;
+  border: 2px solid var(--color-text-primary);
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  top: 2px;
+  left: 2px;
+}
+.industrial-icon-reset::after {
+  width: 0;
+  height: 0;
+  border-top: 4px solid transparent;
+  border-left: 6px solid var(--color-text-primary);
+  border-bottom: 4px solid transparent;
+  top: 0px;
+  right: 1px;
+}
+
+/* Save (downward arrow into a box) */
+.industrial-icon-save::before,
+.industrial-icon-save::after {
+  content: '';
+  position: absolute;
+  background-color: var(--color-text-primary);
+}
+.industrial-icon-save::before { /* box */
+  width: 12px;
+  height: 6px;
+  bottom: 1px;
+  left: 2px;
+}
+.industrial-icon-save::after { /* arrow */
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid var(--color-text-primary);
+  top: 2px;
+  left: 3px;
+}
+
+/* Load (upward arrow from a box) */
+.industrial-icon-load::before,
+.industrial-icon-load::after {
+  content: '';
+  position: absolute;
+  background-color: var(--color-text-primary);
+}
+.industrial-icon-load::before { /* box */
+  width: 12px;
+  height: 6px;
+  top: 1px;
+  left: 2px;
+}
+.industrial-icon-load::after { /* arrow */
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 6px solid var(--color-text-primary);
+  bottom: 2px;
+  left: 3px;
+}
+
+/* Delete (X) */
+.industrial-icon-delete::before,
+.industrial-icon-delete::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 2px;
+  background-color: var(--color-text-primary);
+  top: 7px;
+  left: 2px;
+}
+.industrial-icon-delete::before {
+  transform: rotate(45deg);
+}
+.industrial-icon-delete::after {
+  transform: rotate(-45deg);
+}
+
+/* Export (arrow pointing out of a box – rightwards) */
+.industrial-icon-export::before,
+.industrial-icon-export::after {
+  content: '';
+  position: absolute;
+  background-color: var(--color-text-primary);
+}
+.industrial-icon-export::before { /* box */
+  width: 8px;
+  height: 10px;
+  border: 2px solid var(--color-text-primary);
+  border-left: none;
+  top: 2px;
+  left: 2px;
+}
+.industrial-icon-export::after { /* arrow head */
+  width: 0;
+  height: 0;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-left: 6px solid var(--color-text-primary);
+  top: 6px;
+  right: 1px;
+}
+
+/* Upload (arrow up with line) */
+.industrial-icon-upload::before,
+.industrial-icon-upload::after {
+  content: '';
+  position: absolute;
+  background-color: var(--color-text-primary);
+}
+.industrial-icon-upload::before { /* horizontal line */
+  width: 12px;
+  height: 2px;
+  bottom: 2px;
+  left: 2px;
+}
+.industrial-icon-upload::after { /* arrow */
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 7px solid var(--color-text-primary);
+  top: 3px;
+  left: 3px;
+}
+
+/* ========== STATUS INDICATORS ========== */
+.industrial-status-bar {
+  display: flex;
+  gap: var(--space-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+}
+
+.industrial-status-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.industrial-status-label {
+  color: var(--color-text-secondary);
+}
+
+.industrial-status-value {
+  color: var(--color-text-primary);
+}
+
+.industrial-status-success { color: var(--color-success); }
+.industrial-status-warning { color: var(--color-warning); }
+.industrial-status-error { color: var(--color-error); }
+
+/* ========== FORM CONTROLS ========== */
+.industrial-input {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border-light);
+  color: var(--color-text-primary);
+  padding: var(--space-sm);
+  font-family: inherit;
+  font-size: var(--font-size-md);
+  width: 100%;
+}
+
+.industrial-input:focus {
+  border-color: var(--color-accent);
+  outline: none;
+}
+
+.industrial-select {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border-light);
+  color: var(--color-text-primary);
+  padding: var(--space-sm);
+  font-family: inherit;
+  font-size: var(--font-size-md);
+  width: 100%;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right var(--space-sm) center;
+}
+
+.industrial-checkbox {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--color-border-light);
+  background-color: var(--color-background);
+  display: inline-block;
+  position: relative;
+  margin-right: var(--space-sm);
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.industrial-checkbox:checked::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 10px;
+  height: 10px;
+  background-color: var(--color-accent);
+}
+
+/* ========== UTILITY CLASSES ========== */
+.industrial-flex { display: flex; }
+.industrial-flex-col { flex-direction: column; }
+.industrial-items-center { align-items: center; }
+.industrial-justify-between { justify-content: space-between; }
+.industrial-justify-center { justify-content: center; }
+.industrial-gap-sm { gap: var(--space-sm); }
+.industrial-gap-md { gap: var(--space-md); }
+.industrial-gap-lg { gap: var(--space-lg); }
+
+.industrial-mt-sm { margin-top: var(--space-sm); }
+.industrial-mt-md { margin-top: var(--space-md); }
+.industrial-mb-sm { margin-bottom: var(--space-sm); }
+.industrial-mb-md { margin-bottom: var(--space-md); }
+
+/* newly required utilities */
+.industrial-ml-md { margin-left: var(--space-md); }
+.industrial-flex-grow { flex: 1 1 auto; }
+
+.industrial-w-full { width: 100%; }
+.industrial-h-full { height: 100%; }
+.industrial-text-center { text-align: center; }
+
+/* ========== RESPONSIVE ADJUSTMENTS ========== */
+@media (max-width: 768px) {
+  .industrial-main {
+    flex-direction: column;
+  }
+  
+  .industrial-visualization,
+  .industrial-controls {
+    width: 100%;
+  }
+  
+  .industrial-visualization {
+    height: 60%;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+  }
+  
+  .industrial-controls {
+    height: 40%;
+  }
+  
+  .industrial-button-group {
+    flex-wrap: wrap;
+  }
+  
+  .industrial-status-bar {
+    flex-wrap: wrap;
+  }
+}
+
+/* ========== CANVAS STYLES ========== */
+.industrial-canvas {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-background);
+}
+
+/* Fix for canvas container in visualization area */
+.industrial-visualization > div {
+  flex: 1;
+  height: 100%;
+  min-height: 0;
+}
+
+.industrial-visualization canvas {
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* ========== ANIMATION KEYFRAMES ========== */
+@keyframes industrial-pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.industrial-pulse {
+  animation: industrial-pulse 1.5s infinite;
+}
+
+/* ========== LED INDICATORS ========== */
+.industrial-led {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background-color: var(--color-text-tertiary);
+  margin-right: var(--space-xs);
+}
+
+.industrial-led-on {
+  background-color: var(--color-accent);
+  box-shadow: 0 0 4px var(--color-accent);
+}
+
+.industrial-led-success {
+  background-color: var(--color-success);
+  box-shadow: 0 0 4px var(--color-success);
+}
+
+.industrial-led-warning {
+  background-color: var(--color-warning);
+  box-shadow: 0 0 4px var(--color-warning);
+}
+
+.industrial-led-error {
+  background-color: var(--color-error);
+  box-shadow: 0 0 4px var(--color-error);
+}
+
+/* ========== METER STYLES ========== */
+.industrial-meter-container {
+  width: 100%;
+  height: 20px;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  position: relative;
+  margin: var(--space-sm) 0;
+}
+
+.industrial-meter-bar {
+  height: 100%;
+  background-color: var(--color-accent);
+  transition: width var(--transition-fast);
+}
+
+.industrial-meter-ticks {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 2px;
+  pointer-events: none;
+}
+
+.industrial-meter-tick {
+  width: 1px;
+  height: 100%;
+  background-color: var(--color-border-light);
+}
+
+/* ===============================================================
+   ADVANCED & MUSIC MODULES (new custom components)
+   =============================================================== */
+
+/* ---- Radio Buttons (industrial style) ---- */
+.industrial-radio-group {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.industrial-radio-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.industrial-radio {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--color-border-light);
+  background-color: var(--color-background);
+  position: relative;
+  cursor: pointer;
+}
+
+.industrial-radio:checked::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 8px;
+  height: 8px;
+  background-color: var(--color-accent);
+}
+
+/* ---- Equation display ---- */
+.industrial-equation-display {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border-light);
+  padding: var(--space-sm);
+  margin-top: var(--space-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  font-family: inherit;
+}
+
+.industrial-equation-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---- Mini horizontal slider (used in analysis) ---- */
+.industrial-mini-slider {
+  width: 120px;
+}
+
+.industrial-mini-slider input[type='range'] {
+  width: 100%;
+  height: 6px;
+  appearance: none;
+  background: var(--color-border);
+  cursor: pointer;
+}
+
+.industrial-mini-slider input[type='range']::-webkit-slider-thumb,
+.industrial-horizontal-fader-container input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  background: var(--color-accent);
+  cursor: pointer;
+}
+
+.industrial-mini-slider input[type='range']::-moz-range-thumb,
+.industrial-horizontal-fader-container input[type='range']::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: var(--color-accent);
+  border: none;
+  cursor: pointer;
+}
+
+/* ---- File-input button ---- */
+.industrial-file-input {
+  display: none;
+}
+
+.industrial-file-input-container {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.industrial-file-name {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  max-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---- Data grid for audio analysis ---- */
+.industrial-data-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.industrial-data-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.industrial-data-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.industrial-data-value {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ---- Waveform / Spectrum container ---- */
+.industrial-visualization-container {
+  width: 100%;
+  height: 120px;
+  background-color: var(--color-background-module);
+  border: 1px solid var(--color-border);
+  position: relative;
+}
+
+.industrial-waveform,
+.industrial-spectrum {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
