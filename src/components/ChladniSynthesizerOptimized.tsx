@@ -322,8 +322,12 @@ const ChladniSynthesizerOptimized: React.FC<ChladniSynthesizerOptimizedProps> = 
     if (!canvas) return;
     
     // Obtener dimensiones del canvas
-    const width = canvas.width;
-    const height = canvas.height;
+    //  canvas.width / height están en píxeles físicos (multiplicados por DPR)
+    //  Convertimos a unidades CSS lógicas para que coincidan con el sistema
+    //  de coordenadas ya escalado mediante ctx.scale(dpr, dpr).
+    const dpr = window.devicePixelRatio || 1;
+    const width  = canvas.width  / dpr;
+    const height = canvas.height / dpr;
     
     // Omitir si el canvas no tiene dimensiones
     if (width === 0 || height === 0) return;
