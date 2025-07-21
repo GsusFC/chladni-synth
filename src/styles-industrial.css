@@ -9,6 +9,89 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* ========== CUSTOM SCROLLBARS - INDUSTRIAL STYLE ========== */
+/* Webkit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-background-module);
+  border: 1px solid var(--color-border);
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--color-accent) 0%, #d4491f 100%);
+  border: 1px solid rgba(255, 107, 53, 0.3);
+  border-radius: 0;
+  transition: all 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--color-accent-hover) 0%, #e55a2b 100%);
+  border-color: rgba(255, 107, 53, 0.5);
+  box-shadow: 0 0 8px rgba(255, 107, 53, 0.3);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(180deg, var(--color-accent-active) 0%, #c44a1f 100%);
+  border-color: rgba(255, 107, 53, 0.7);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--color-background-module);
+  border: 1px solid var(--color-border);
+}
+
+/* Scrollbar para elementos específicos con variaciones */
+.industrial-scrollbar-thin::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.industrial-scrollbar-thick::-webkit-scrollbar {
+  width: 16px;
+  height: 16px;
+}
+
+/* Firefox scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-accent) var(--color-background-module);
+}
+
+.industrial-scrollbar-thick {
+  scrollbar-width: auto;
+}
+
+/* Scrollbar para áreas de contenido específicas */
+.industrial-content-area {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-accent) transparent;
+}
+
+.industrial-content-area::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.industrial-content-area::-webkit-scrollbar-track {
+  background: transparent;
+  border: none;
+}
+
+.industrial-content-area::-webkit-scrollbar-thumb {
+  background: rgba(255, 107, 53, 0.6);
+  border: none;
+  border-radius: 2px;
+}
+
+.industrial-content-area::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 107, 53, 0.8);
+}
+
 html, body, #root {
   width: 100%;
   height: 100%;
@@ -824,11 +907,1219 @@ body {
 .industrial-h-full { height: 100%; }
 .industrial-text-center { text-align: center; }
 
+/* ========== FADER LAYOUT CLASSES ========== */
+.industrial-fader-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--space-md);
+  width: 100%;
+}
+
+.industrial-fader-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+/* ========== AUDIO CONTROLS ========== */
+.industrial-file-input {
+  display: none; /* Ocultar el input nativo */
+}
+
+.industrial-text-input {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  padding: 0.5rem;
+  border-radius: 2px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  min-width: 200px;
+  transition: border-color 0.2s ease;
+}
+
+.industrial-text-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent);
+}
+
+.industrial-text-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.industrial-text-small {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ========== STREAM CONTROLS ========== */
+.industrial-stream-input-container {
+  background-color: rgba(255, 107, 53, 0.05);
+  border: 1px solid rgba(255, 107, 53, 0.2);
+  border-radius: 4px;
+  padding: 1rem;
+  margin-top: 0.75rem;
+}
+
+.industrial-flex-1 {
+  flex: 1;
+}
+
+.industrial-status-indicator {
+  font-size: 0.8rem;
+  font-family: var(--font-mono);
+  padding: 0.4rem 0.8rem;
+  border-radius: 3px;
+  background-color: rgba(0, 0, 0, 0.4);
+  border: 1px solid transparent;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+}
+
+.industrial-status-idle {
+  color: #888;
+  border-color: rgba(136, 136, 136, 0.3);
+}
+.industrial-status-loading {
+  color: #FF6B35;
+  border-color: rgba(255, 107, 53, 0.3);
+  animation: pulse 1.5s infinite;
+}
+.industrial-status-ready {
+  color: #00ff88;
+  border-color: rgba(0, 255, 136, 0.3);
+  box-shadow: 0 0 8px rgba(0, 255, 136, 0.2);
+}
+.industrial-status-error {
+  color: #ff4444;
+  border-color: rgba(255, 68, 68, 0.3);
+  animation: shake 0.5s ease-in-out;
+}
+
+.industrial-details {
+  margin-top: 0.75rem;
+  border: 1px solid rgba(255, 107, 53, 0.15);
+  border-radius: 3px;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.industrial-details-summary {
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid rgba(255, 107, 53, 0.15);
+  transition: all 0.2s ease;
+  user-select: none;
+  font-weight: 500;
+}
+
+.industrial-details-summary:hover {
+  color: var(--color-accent);
+  background-color: rgba(255, 107, 53, 0.05);
+}
+
+.industrial-details-content {
+  padding: 0.75rem;
+  font-size: 0.7rem;
+  line-height: 1.5;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.industrial-details[open] .industrial-details-summary {
+  border-bottom-color: rgba(255, 107, 53, 0.3);
+}
+
+/* Animaciones para status indicators */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+/* ========== PIANO VIRTUAL ========== */
+.piano-drawer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--color-bg-secondary);
+  border-top: 2px solid var(--color-accent);
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+  z-index: 1000;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.piano-drawer.open {
+  transform: translateY(0);
+}
+
+.piano-drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background-color: rgba(255, 107, 53, 0.1);
+  border-bottom: 1px solid rgba(255, 107, 53, 0.2);
+}
+
+.piano-drawer-title {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.piano-drawer-toggle {
+  background: none;
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent);
+  padding: 0.5rem 1rem;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.piano-drawer-toggle:hover {
+  background-color: var(--color-accent);
+  color: var(--color-bg);
+}
+
+.piano-keyboard {
+  position: relative;
+  height: 120px;
+  padding: 1rem;
+  user-select: none;
+}
+
+.piano-natural-keys {
+  display: flex;
+  height: 100%;
+  gap: 1px;
+}
+
+.piano-sharp-keys {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  right: 1rem;
+  height: 60%;
+  pointer-events: none;
+}
+
+.piano-key {
+  cursor: pointer;
+  transition: all 0.1s ease;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 0.5rem;
+  border-radius: 0 0 4px 4px;
+  position: relative;
+  pointer-events: all;
+}
+
+.piano-key-natural {
+  flex: 1;
+  background: linear-gradient(to bottom, #f8f8f8, #e0e0e0);
+  border: 1px solid #ccc;
+  color: #333;
+}
+
+.piano-key-sharp {
+  background: linear-gradient(to bottom, #2a2a2a, #1a1a1a);
+  border: 1px solid #000;
+  color: #fff;
+  width: 60%;
+  height: 60%;
+  position: absolute;
+  z-index: 2;
+}
+
+.piano-key-pressed.piano-key-natural {
+  background: linear-gradient(to bottom, var(--color-accent), #d4491f);
+  color: white;
+  transform: translateY(2px);
+}
+
+.piano-key-pressed.piano-key-sharp {
+  background: linear-gradient(to bottom, var(--color-accent), #d4491f);
+  transform: translateY(1px);
+}
+
+.piano-key-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.piano-key-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.piano-key-label sub {
+  font-size: 0.6rem;
+  opacity: 0.7;
+}
+
+/* Hover effects */
+.piano-key:not(.piano-key-disabled):not(.piano-key-pressed):hover.piano-key-natural {
+  background: linear-gradient(to bottom, #fff, #f0f0f0);
+  transform: translateY(1px);
+}
+
+.piano-key:not(.piano-key-disabled):not(.piano-key-pressed):hover.piano-key-sharp {
+  background: linear-gradient(to bottom, #3a3a3a, #2a2a2a);
+}
+
+/* Toggle button para mostrar/ocultar piano */
+.piano-toggle-button {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  background-color: var(--color-accent);
+  color: var(--color-bg);
+  border: none;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+  transition: all 0.3s ease;
+  z-index: 1001;
+}
+
+.piano-toggle-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4);
+}
+
+.piano-toggle-button.active {
+  background-color: #d4491f;
+}
+
+/* ========== SCROLLBARS ESPECÍFICOS POR CONTEXTO ========== */
+
+/* Scrollbar para sidebars y paneles laterales */
+.industrial-sidebar::-webkit-scrollbar,
+.industrial-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.industrial-sidebar::-webkit-scrollbar-track,
+.industrial-panel::-webkit-scrollbar-track {
+  background: rgba(17, 17, 17, 0.8);
+  border: 1px solid rgba(34, 34, 34, 0.5);
+}
+
+.industrial-sidebar::-webkit-scrollbar-thumb,
+.industrial-panel::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(255, 107, 53, 0.7) 0%, rgba(212, 73, 31, 0.7) 100%);
+  border: 1px solid rgba(255, 107, 53, 0.2);
+}
+
+/* Scrollbar para modales y overlays */
+.industrial-modal::-webkit-scrollbar,
+.industrial-overlay::-webkit-scrollbar {
+  width: 10px;
+}
+
+.industrial-modal::-webkit-scrollbar-track,
+.industrial-overlay::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(255, 107, 53, 0.1);
+}
+
+.industrial-modal::-webkit-scrollbar-thumb,
+.industrial-overlay::-webkit-scrollbar-thumb {
+  background: var(--color-accent);
+  border: none;
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Scrollbar para listas y tablas */
+.industrial-list::-webkit-scrollbar,
+.industrial-table::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.industrial-list::-webkit-scrollbar-track,
+.industrial-table::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.industrial-list::-webkit-scrollbar-thumb,
+.industrial-table::-webkit-scrollbar-thumb {
+  background: rgba(255, 107, 53, 0.5);
+  border-radius: 3px;
+}
+
+.industrial-list::-webkit-scrollbar-thumb:hover,
+.industrial-table::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 107, 53, 0.7);
+}
+
+/* Scrollbar para código y texto monoespaciado */
+.industrial-code::-webkit-scrollbar,
+.industrial-terminal::-webkit-scrollbar,
+pre::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.industrial-code::-webkit-scrollbar-track,
+.industrial-terminal::-webkit-scrollbar-track,
+pre::-webkit-scrollbar-track {
+  background: #0a0a0a;
+  border: 1px solid #1a1a1a;
+}
+
+.industrial-code::-webkit-scrollbar-thumb,
+.industrial-terminal::-webkit-scrollbar-thumb,
+pre::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, var(--color-accent) 0%, #d4491f 50%, var(--color-accent) 100%);
+  border: 1px solid rgba(255, 107, 53, 0.3);
+}
+
+/* Scrollbar para el piano y componentes musicales */
+.piano-drawer::-webkit-scrollbar,
+.piano-keyboard::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.piano-drawer::-webkit-scrollbar-track,
+.piano-keyboard::-webkit-scrollbar-track {
+  background: rgba(255, 107, 53, 0.1);
+  border: 1px solid rgba(255, 107, 53, 0.2);
+}
+
+.piano-drawer::-webkit-scrollbar-thumb,
+.piano-keyboard::-webkit-scrollbar-thumb {
+  background: var(--color-accent);
+  border-radius: 3px;
+  border: none;
+}
+
+/* Scrollbar hover effects con animaciones */
+::-webkit-scrollbar-thumb {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  transform: scaleY(1.1);
+}
+
+/* Scrollbar para elementos con scroll horizontal */
+.horizontal-scroll::-webkit-scrollbar:horizontal {
+  height: 8px;
+}
+
+.horizontal-scroll::-webkit-scrollbar-track:horizontal {
+  background: var(--color-background-module);
+  border-top: 1px solid var(--color-border);
+}
+
+.horizontal-scroll::-webkit-scrollbar-thumb:horizontal {
+  background: linear-gradient(90deg, var(--color-accent) 0%, #d4491f 100%);
+  border-top: 1px solid rgba(255, 107, 53, 0.3);
+}
+
+/* ========== CLASES UTILITARIAS PARA SCROLLBARS ========== */
+
+/* Scrollbar invisible pero funcional */
+.scrollbar-hidden {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+
+/* Scrollbar minimalista */
+.scrollbar-minimal::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.scrollbar-minimal::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-minimal::-webkit-scrollbar-thumb {
+  background: rgba(255, 107, 53, 0.4);
+  border-radius: 2px;
+  border: none;
+}
+
+.scrollbar-minimal::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 107, 53, 0.6);
+}
+
+/* Scrollbar con efecto glow */
+.scrollbar-glow::-webkit-scrollbar-thumb {
+  background: var(--color-accent);
+  box-shadow:
+    0 0 4px rgba(255, 107, 53, 0.5),
+    inset 0 0 4px rgba(255, 255, 255, 0.1);
+}
+
+.scrollbar-glow::-webkit-scrollbar-thumb:hover {
+  box-shadow:
+    0 0 8px rgba(255, 107, 53, 0.7),
+    inset 0 0 4px rgba(255, 255, 255, 0.2);
+}
+
+/* Scrollbar con patrón industrial */
+.scrollbar-industrial::-webkit-scrollbar-thumb {
+  background:
+    linear-gradient(45deg,
+      var(--color-accent) 25%,
+      transparent 25%,
+      transparent 50%,
+      var(--color-accent) 50%,
+      var(--color-accent) 75%,
+      transparent 75%
+    );
+  background-size: 4px 4px;
+  border: 1px solid rgba(255, 107, 53, 0.3);
+}
+
+/* Scrollbar para modo oscuro intenso */
+.scrollbar-dark::-webkit-scrollbar-track {
+  background: #000000;
+  border: 1px solid #111111;
+}
+
+.scrollbar-dark::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #333333 0%, #1a1a1a 100%);
+  border: 1px solid #444444;
+}
+
+.scrollbar-dark::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--color-accent) 0%, #d4491f 100%);
+  border-color: rgba(255, 107, 53, 0.5);
+}
+
+/* Scrollbar animado */
+.scrollbar-animated::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    45deg,
+    var(--color-accent) 0%,
+    #d4491f 25%,
+    var(--color-accent) 50%,
+    #d4491f 75%,
+    var(--color-accent) 100%
+  );
+  background-size: 20px 20px;
+  animation: scrollbar-slide 2s linear infinite;
+}
+
+@keyframes scrollbar-slide {
+  0% { background-position: 0 0; }
+  100% { background-position: 20px 20px; }
+}
+
+/* Aplicar automáticamente a elementos comunes */
+.industrial-card,
+.industrial-panel,
+.industrial-sidebar,
+.industrial-content {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-accent) var(--color-background-module);
+}
+
+/* Scrollbar para elementos de formulario */
+select.industrial-select,
+textarea.industrial-textarea {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-accent) transparent;
+}
+
+select.industrial-select::-webkit-scrollbar,
+textarea.industrial-textarea::-webkit-scrollbar {
+  width: 8px;
+}
+
+select.industrial-select::-webkit-scrollbar-track,
+textarea.industrial-textarea::-webkit-scrollbar-track {
+  background: rgba(17, 17, 17, 0.8);
+}
+
+select.industrial-select::-webkit-scrollbar-thumb,
+textarea.industrial-textarea::-webkit-scrollbar-thumb {
+  background: var(--color-accent);
+  border-radius: 4px;
+}
+
+/* ========== SCROLLBARS PARA ELEMENTOS ESPECÍFICOS DE LA APP ========== */
+
+/* Scrollbar para el área de visualización principal */
+.industrial-visualization {
+  scrollbar-width: none; /* Ocultar scrollbar en el área de visualización */
+  -ms-overflow-style: none;
+}
+
+.industrial-visualization::-webkit-scrollbar {
+  display: none;
+}
+
+/* Scrollbar para módulos y tarjetas */
+.industrial-module {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 107, 53, 0.6) transparent;
+}
+
+.industrial-module::-webkit-scrollbar {
+  width: 6px;
+}
+
+.industrial-module::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.industrial-module::-webkit-scrollbar-thumb {
+  background: rgba(255, 107, 53, 0.6);
+  border-radius: 3px;
+}
+
+.industrial-module::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 107, 53, 0.8);
+}
+
+/* Scrollbar para el contenido de módulos */
+.industrial-module-content {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 107, 53, 0.5) transparent;
+}
+
+.industrial-module-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.industrial-module-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.industrial-module-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 107, 53, 0.5);
+  border-radius: 2px;
+}
+
+/* Scrollbar para tabs y navegación */
+.industrial-sidebar-tabs {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-accent) rgba(17, 17, 17, 0.5);
+}
+
+.industrial-sidebar-tabs::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.industrial-sidebar-tabs::-webkit-scrollbar-track {
+  background: rgba(17, 17, 17, 0.5);
+  border-radius: 3px;
+}
+
+.industrial-sidebar-tabs::-webkit-scrollbar-thumb {
+  background: var(--color-accent);
+  border-radius: 3px;
+}
+
+/* Scrollbar para dropdowns y selects personalizados */
+.industrial-dropdown,
+.industrial-select-custom {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-accent) var(--color-background-module);
+}
+
+.industrial-dropdown::-webkit-scrollbar,
+.industrial-select-custom::-webkit-scrollbar {
+  width: 8px;
+}
+
+.industrial-dropdown::-webkit-scrollbar-track,
+.industrial-select-custom::-webkit-scrollbar-track {
+  background: var(--color-background-module);
+  border: 1px solid var(--color-border);
+  border-radius: 0;
+}
+
+.industrial-dropdown::-webkit-scrollbar-thumb,
+.industrial-select-custom::-webkit-scrollbar-thumb {
+  background: var(--color-accent);
+  border: 1px solid rgba(255, 107, 53, 0.3);
+  border-radius: 0;
+}
+
+/* Scrollbar para tooltips y overlays */
+.industrial-tooltip,
+.industrial-overlay-content {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 107, 53, 0.7) rgba(0, 0, 0, 0.8);
+}
+
+.industrial-tooltip::-webkit-scrollbar,
+.industrial-overlay-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.industrial-tooltip::-webkit-scrollbar-track,
+.industrial-overlay-content::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.industrial-tooltip::-webkit-scrollbar-thumb,
+.industrial-overlay-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 107, 53, 0.7);
+  border-radius: 3px;
+}
+
+/* Scrollbar para elementos de estado y métricas */
+.industrial-status-bar,
+.industrial-meter-container {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.industrial-status-bar::-webkit-scrollbar,
+.industrial-meter-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* Scrollbar responsive para móviles */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .industrial-sidebar::-webkit-scrollbar,
+  .industrial-panel::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .industrial-content-area::-webkit-scrollbar {
+    width: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-minimal::-webkit-scrollbar {
+    width: 3px;
+    height: 3px;
+  }
+}
+
+/* ========== GUÍA DE USO DE SCROLLBARS INDUSTRIALES ========== */
+/*
+CLASES DISPONIBLES:
+
+1. SCROLLBARS BÁSICOS:
+   - Por defecto: Todos los elementos tienen scrollbar industrial automáticamente
+   - .scrollbar-hidden: Oculta el scrollbar pero mantiene funcionalidad
+   - .scrollbar-minimal: Scrollbar muy delgado y discreto
+
+2. SCROLLBARS TEMÁTICOS:
+   - .scrollbar-glow: Scrollbar con efecto de brillo
+   - .scrollbar-industrial: Scrollbar con patrón industrial
+   - .scrollbar-dark: Scrollbar para modo oscuro intenso
+   - .scrollbar-animated: Scrollbar con animación
+
+3. SCROLLBARS POR CONTEXTO:
+   - .industrial-sidebar: Para paneles laterales
+   - .industrial-panel: Para paneles y drawers
+   - .industrial-content-area: Para áreas de contenido
+   - .industrial-modal: Para modales y overlays
+   - .industrial-list: Para listas y tablas
+   - .industrial-code: Para código y texto monoespaciado
+
+4. SCROLLBARS ESPECÍFICOS:
+   - .piano-drawer: Para el piano virtual
+   - .industrial-module: Para módulos y tarjetas
+   - .industrial-dropdown: Para dropdowns
+
+EJEMPLOS DE USO:
+
+<!-- Scrollbar básico (automático) -->
+<div className="industrial-panel">Contenido con scroll</div>
+
+<!-- Scrollbar minimalista -->
+<div className="industrial-content scrollbar-minimal">Contenido discreto</div>
+
+<!-- Scrollbar con brillo -->
+<div className="industrial-modal scrollbar-glow">Modal con efecto</div>
+
+<!-- Scrollbar oculto -->
+<div className="industrial-visualization scrollbar-hidden">Sin scrollbar visible</div>
+
+<!-- Scrollbar animado -->
+<div className="industrial-code scrollbar-animated">Código con animación</div>
+
+CARACTERÍSTICAS:
+- Color principal: #FF6B35 (naranja industrial)
+- Hover: Efectos de brillo y escalado
+- Responsive: Se adapta a diferentes tamaños de pantalla
+- Compatibilidad: Webkit (Chrome, Safari, Edge) y Firefox
+- Animaciones: Transiciones suaves y efectos visuales
+*/
+
+/* ========== SIDEBAR TABS ========== */
+.industrial-sidebar-tabs {
+  /* Espaciado y línea divisoria eliminados */
+}
+
+.industrial-sidebar-tabs .industrial-tabs {
+  justify-content: flex-start;
+  gap: var(--space-sm);
+}
+
+.industrial-sidebar-tabs .industrial-tab {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+}
+
+/* ========== INFO BOX ========== */
+.industrial-info-box {
+  background-color: rgba(0, 255, 255, 0.05);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  border-radius: 4px;
+  padding: var(--space-md);
+}
+
+.industrial-info-title {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: var(--color-accent);
+  margin-bottom: var(--space-sm);
+  font-family: var(--font-mono);
+}
+
+.industrial-info-content p {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  margin: 0.25rem 0;
+  line-height: 1.4;
+}
+
+/* ========== INDUSTRIAL CARD ENHANCEMENTS ========== */
+.industrial-module-title-section {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.industrial-module-icon {
+  font-size: 1rem;
+  opacity: 0.8;
+}
+
+.industrial-module-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+/* ========== INDUSTRIAL BUTTON GROUP ENHANCEMENTS ========== */
+.industrial-button-group-sm .industrial-button {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.7rem;
+}
+
+.industrial-button-group-md .industrial-button {
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+}
+
+.industrial-button-group-lg .industrial-button {
+  padding: 0.75rem 1.25rem;
+  font-size: 0.9rem;
+}
+
+.industrial-button-icon {
+  margin-right: 0.25rem;
+  font-size: 0.9em;
+}
+
+/* ========== ACTIVE BUTTON TEXT COLOR ========== */
+.industrial-button-active {
+  color: #000000 !important; /* Texto negro cuando está activo */
+}
+
+.industrial-button-active .industrial-button-icon {
+  color: #000000 !important; /* Iconos también en negro cuando está activo */
+}
+
+/* ========== ENHANCED VERTICAL FADER ========== */
+.industrial-fader-container-enhanced {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: var(--space-md) 0;
+  position: relative;
+  user-select: none;
+}
+
+.industrial-fader-label-enhanced {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 500;
+  transition: color var(--transition-fast);
+}
+
+.industrial-fader-value-enhanced {
+  font-size: var(--font-size-md);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-sm);
+  font-weight: bold;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 1px;
+  background: rgba(255, 165, 0, 0.1);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 165, 0, 0.2);
+  transition: all var(--transition-fast);
+  min-width: 60px;
+  text-align: center;
+}
+
+.industrial-fader-track-enhanced {
+  position: relative;
+  width: 12px;
+  background: linear-gradient(180deg,
+    var(--color-border) 0%,
+    rgba(255, 165, 0, 0.1) 50%,
+    var(--color-border) 100%);
+  cursor: pointer;
+  border-radius: 6px;
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.3),
+    0 1px 2px rgba(0, 0, 0, 0.2);
+  transition: all var(--transition-fast);
+  outline: none;
+  overflow: hidden;
+}
+
+.industrial-fader-track-enhanced:focus {
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.3),
+    0 0 0 2px rgba(255, 165, 0, 0.3);
+}
+
+.industrial-fader-track-enhanced.hovered {
+  background: linear-gradient(180deg,
+    var(--color-border) 0%,
+    rgba(255, 165, 0, 0.2) 50%,
+    var(--color-border) 100%);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.3),
+    0 2px 8px rgba(255, 165, 0, 0.2);
+}
+
+.industrial-fader-fill-enhanced {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: linear-gradient(0deg,
+    var(--color-accent) 0%,
+    rgba(255, 165, 0, 0.8) 100%);
+  border-radius: 0 0 6px 6px;
+  transition: height var(--transition-smooth);
+  pointer-events: none;
+}
+
+.industrial-fader-thumb-enhanced {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  background: radial-gradient(circle,
+    var(--color-accent) 0%,
+    rgba(255, 165, 0, 0.9) 70%,
+    rgba(255, 165, 0, 0.7) 100%);
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  cursor: grab;
+  box-shadow:
+    0 4px 12px rgba(255, 165, 0, 0.4),
+    inset 0 1px 2px rgba(255, 255, 255, 0.2);
+  transition: all var(--transition-fast);
+  z-index: 3;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.industrial-fader-thumb-enhanced:hover {
+  background: radial-gradient(circle,
+    #ffb347 0%,
+    var(--color-accent) 70%,
+    rgba(255, 165, 0, 0.8) 100%);
+  box-shadow:
+    0 6px 16px rgba(255, 165, 0, 0.6),
+    inset 0 1px 2px rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.industrial-fader-thumb-enhanced.dragging {
+  cursor: grabbing;
+  background: radial-gradient(circle,
+    #ffb347 0%,
+    var(--color-accent) 50%,
+    rgba(255, 165, 0, 0.9) 100%);
+  box-shadow:
+    0 8px 20px rgba(255, 165, 0, 0.8),
+    inset 0 1px 2px rgba(255, 255, 255, 0.4);
+  transform: translate(-50%, -50%) scale(1.15);
+}
+
+.industrial-fader-tick-enhanced {
+  position: absolute;
+  width: 16px;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 100%);
+  left: -2px;
+  z-index: 1;
+  transition: opacity var(--transition-fast);
+}
+
+.industrial-fader-track-enhanced.hovered .industrial-fader-tick-enhanced {
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 165, 0, 0.5) 50%,
+    transparent 100%);
+}
+
+.industrial-fader-hover-indicator {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border: 2px solid rgba(255, 165, 0, 0.6);
+  border-radius: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  animation: pulse-ring 1.5s infinite;
+  z-index: 2;
+}
+
+
+
+.industrial-fader-container-enhanced:hover .industrial-fader-label-enhanced {
+  color: var(--color-accent);
+}
+
+.industrial-fader-container-enhanced:hover .industrial-fader-value-enhanced {
+  background: rgba(255, 165, 0, 0.15);
+  border-color: rgba(255, 165, 0, 0.3);
+  box-shadow: 0 2px 8px rgba(255, 165, 0, 0.2);
+}
+
+@keyframes pulse-ring {
+  0% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  50% {
+    opacity: 0.3;
+    transform: translate(-50%, -50%) scale(1.0);
+  }
+  100% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+}
+
+/* ========== ENHANCED HORIZONTAL FADER ========== */
+.industrial-horizontal-fader-container-enhanced {
+  display: flex;
+  flex-direction: column;
+  margin: var(--space-sm) 0;
+  user-select: none;
+}
+
+.industrial-horizontal-fader-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-xs);
+}
+
+.industrial-horizontal-fader-label {
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 500;
+  transition: color var(--transition-fast);
+}
+
+.industrial-horizontal-fader-value {
+  color: var(--color-text-primary);
+  font-weight: bold;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 1px;
+  background: rgba(255, 165, 0, 0.1);
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 165, 0, 0.2);
+  transition: all var(--transition-fast);
+  min-width: 40px;
+  text-align: center;
+}
+
+.industrial-horizontal-fader-track-enhanced {
+  position: relative;
+  background: linear-gradient(90deg,
+    var(--color-border) 0%,
+    rgba(255, 165, 0, 0.1) 50%,
+    var(--color-border) 100%);
+  cursor: pointer;
+  border-radius: 4px;
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.3),
+    0 1px 2px rgba(0, 0, 0, 0.2);
+  transition: all var(--transition-fast);
+  outline: none;
+  overflow: hidden;
+}
+
+.industrial-horizontal-fader-track-enhanced:focus {
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.3),
+    0 0 0 2px rgba(255, 165, 0, 0.3);
+}
+
+.industrial-horizontal-fader-track-enhanced.hovered {
+  background: linear-gradient(90deg,
+    var(--color-border) 0%,
+    rgba(255, 165, 0, 0.2) 50%,
+    var(--color-border) 100%);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.3),
+    0 2px 8px rgba(255, 165, 0, 0.2);
+}
+
+.industrial-horizontal-fader-fill-enhanced {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: linear-gradient(90deg,
+    var(--color-accent) 0%,
+    rgba(255, 165, 0, 0.8) 100%);
+  border-radius: 4px 0 0 4px;
+  transition: width var(--transition-smooth);
+  pointer-events: none;
+}
+
+.industrial-horizontal-fader-thumb-enhanced {
+  position: absolute;
+  background: radial-gradient(circle,
+    var(--color-accent) 0%,
+    rgba(255, 165, 0, 0.9) 70%,
+    rgba(255, 165, 0, 0.7) 100%);
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  cursor: grab;
+  box-shadow:
+    0 4px 12px rgba(255, 165, 0, 0.4),
+    inset 0 1px 2px rgba(255, 255, 255, 0.2);
+  transition: all var(--transition-fast);
+  z-index: 3;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.industrial-horizontal-fader-thumb-enhanced:hover {
+  background: radial-gradient(circle,
+    #ffb347 0%,
+    var(--color-accent) 70%,
+    rgba(255, 165, 0, 0.8) 100%);
+  box-shadow:
+    0 6px 16px rgba(255, 165, 0, 0.6),
+    inset 0 1px 2px rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.industrial-horizontal-fader-thumb-enhanced.dragging {
+  cursor: grabbing;
+  background: radial-gradient(circle,
+    #ffb347 0%,
+    var(--color-accent) 50%,
+    rgba(255, 165, 0, 0.9) 100%);
+  box-shadow:
+    0 8px 20px rgba(255, 165, 0, 0.8),
+    inset 0 1px 2px rgba(255, 255, 255, 0.4);
+  transform: translate(-50%, -50%) scale(1.15);
+}
+
+.industrial-horizontal-fader-hover-indicator {
+  position: absolute;
+  border: 2px solid rgba(255, 165, 0, 0.6);
+  border-radius: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  animation: pulse-ring 1.5s infinite;
+  z-index: 2;
+}
+
+.industrial-horizontal-fader-container-enhanced:hover .industrial-horizontal-fader-label {
+  color: var(--color-accent);
+}
+
+.industrial-horizontal-fader-container-enhanced:hover .industrial-horizontal-fader-value {
+  background: rgba(255, 165, 0, 0.15);
+  border-color: rgba(255, 165, 0, 0.3);
+  box-shadow: 0 2px 8px rgba(255, 165, 0, 0.2);
+}
+
 /* ========  CHLADNI OPTIMIZED CANVAS WRAPPER & OVERLAY  ======== */
 .industrial-chladni-container {
   position: relative;
   width: 100%;
   height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Overlay panel that sits inside visualization area */
@@ -887,12 +2178,29 @@ body {
 /* ========== CANVAS STYLES ========== */
 .industrial-canvas {
   display: block;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  position: relative;
   background-color: var(--color-background);
+  /* Hacer el canvas cuadrado usando el menor de width/height disponible */
+  width: min(100vw, 100vh, 70vw, 100%);
+  height: min(100vw, 100vh, 70vw, 100%);
+  max-width: 800px;
+  max-height: 800px;
+  transition: border-radius 0.3s ease, clip-path 0.3s ease;
+}
+
+/* Formas del canvas */
+.industrial-canvas.canvas-shape-square {
+  border-radius: 0;
+  clip-path: none;
+}
+
+.industrial-canvas.canvas-shape-circle {
+  border-radius: 50%;
+  /* Usar 50% para que el círculo tenga el mismo tamaño que el cuadrado */
+  clip-path: circle(50% at center);
+  /* Asegurar que el círculo mantenga el mismo tamaño que el cuadrado */
+  width: min(100vw, 100vh, 70vw, 100%);
+  height: min(100vw, 100vh, 70vw, 100%);
 }
 
 /* Fix for canvas container in visualization area */
@@ -903,11 +2211,14 @@ body {
 }
 
 .industrial-visualization canvas {
-  position: absolute !important;
-  top: 0;
-  left: 0;
-  width: 100% !important;
-  height: 100% !important;
+  position: relative !important;
+  /* Canvas cuadrado centrado */
+  width: min(100%, 70vh) !important;
+  height: min(100%, 70vh) !important;
+  max-width: 800px !important;
+  max-height: 800px !important;
+  /* Forzar aspecto cuadrado */
+  aspect-ratio: 1 / 1 !important;
 }
 
 /* ========== ANIMATION KEYFRAMES ========== */

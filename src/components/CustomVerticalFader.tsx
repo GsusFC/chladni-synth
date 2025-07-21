@@ -11,6 +11,7 @@ interface CustomVerticalFaderProps {
   height?: number;
   tickCount?: number;
   className?: string;
+  precision?: number; // Number of decimal places for precision
 }
 
 const CustomVerticalFader: React.FC<CustomVerticalFaderProps> = ({
@@ -23,7 +24,8 @@ const CustomVerticalFader: React.FC<CustomVerticalFaderProps> = ({
   formatValue,
   height = 120,
   tickCount = 5,
-  className = ''
+  className = '',
+  precision = 2 // Default to 2 decimal places
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -59,15 +61,16 @@ const CustomVerticalFader: React.FC<CustomVerticalFaderProps> = ({
     
     // Convert percentage to value
     const newValue = min + percentage * (max - min);
-    
+
     // Round to integer if min and max are integers
     if (Number.isInteger(min) && Number.isInteger(max)) {
       return Math.round(newValue);
     }
-    
-    // Otherwise round to 2 decimal places
-    return Math.round(newValue * 100) / 100;
-  }, [min, max, value]);
+
+    // Round to specified precision (default 2 decimal places)
+    const multiplier = Math.pow(10, precision);
+    return Math.round(newValue * multiplier) / multiplier;
+  }, [min, max, value, precision]);
 
   // Handle mouse down on track
   const handleTrackMouseDown = useCallback((e: React.MouseEvent) => {

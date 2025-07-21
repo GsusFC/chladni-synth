@@ -1,5 +1,17 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 
+// Interfaces para datos de audio
+interface AudioAnalysisData {
+  frequencyData: Uint8Array;
+  timeDomainData: Uint8Array;
+  dominantFrequency: number;
+  averageAmplitude: number;
+  bassLevel: number;
+  midLevel: number;
+  trebleLevel: number;
+  isBeat: boolean;
+}
+
 // --- Configuración simplificada ---
 const RAND_NM = 20; // Valores máximos para parámetros n y m
 const SHUFFLE_INTERVAL = 300; // frames entre cambios automáticos
@@ -38,29 +50,81 @@ export interface ChladniSynthesizerOptimizedProps {
   colorMode?: 'spectrum' | 'amplitude' | 'frequency';
   useWebGL?: boolean;
   particleDensity?: 'low' | 'medium' | 'high' | 'ultra';
-  useOffscreenCanvas?: boolean;
-  useWorker?: boolean;
+  // Props de Worker eliminadas - funcionalidad no implementada
   fpsLimit?: number;
   /** Sensibilidad al audio (1-100) */
   sensitivity?: number;
   /** Indica si se ha detectado un beat para efectos visuales */
   beatDetected?: boolean;
+
+  /** Controles de movimiento (antes hardcodeados) */
+  /** Velocidad base de movimiento de partículas (0.001-0.1) */
+  particleSpeed?: number;
+  /** Intensidad de vibración/temblor (0.0001-0.01) */
+  vibrationIntensity?: number;
+  /** Factor de aleatoriedad en el movimiento (0.1-2.0) */
+  randomnessFactor?: number;
+  /** Intensidad del pulso en beats (1.0-5.0) */
+  beatPulseIntensity?: number;
+
+  /** Efectos visuales avanzados */
+  particleShape?: 'square' | 'circle' | 'triangle' | 'star';
+  blendMode?: 'normal' | 'additive' | 'multiply';
+  trailEffect?: number; // 0.0-1.0, 0 = sin estela, 1 = estela máxima
+
+  /** Controles de audio expandidos */
+  audioSource?: 'microphone' | 'file' | 'stream';
+  audioFile?: File | null;
+  streamUrl?: string;
+  isAudioPlaying?: boolean;
+  onAudioFileChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onAudioSourceChange?: (source: 'microphone' | 'file' | 'stream') => void;
+  onToggleAudio?: () => void;
   /** Muestra/oculta la superposición de controles interna. */
   showControls?: boolean;
+  /** Tamaño de las partículas (1-10) */
+  particleSize?: number;
+  /** Opacidad de las partículas (0.1-1.0) */
+  particleOpacity?: number;
+  /** Activar cambio automático de parámetros */
+  autoShuffle?: boolean;
+  /** Forma del canvas/placa */
+  canvasShape?: 'square' | 'circle';
+  /** Datos de audio externos (ej. del piano virtual) */
+  audioData?: AudioAnalysisData | null;
 }
 
 const ChladniSynthesizerOptimized: React.FC<ChladniSynthesizerOptimizedProps> = (props) => {
+  console.log('🔍 ChladniSynthesizerOptimized renderizado con props:', { particleDensity: props.particleDensity });
+
   const {
     initialN = 5,
     initialM = 3,
     colorMode = 'spectrum',
     useWebGL = true,
     particleDensity = 'medium',
-    useOffscreenCanvas = false,
-    useWorker = false,
+    // Props de Worker eliminadas
     fpsLimit = 60,
     sensitivity = 50,
-    beatDetected = false
+    beatDetected = false,
+    particleSize: propParticleSize = 2,
+    particleOpacity: propParticleOpacity = 0.8,
+    autoShuffle: propAutoShuffle = false,
+    canvasShape = 'square',
+
+    // Controles de movimiento (antes hardcodeados)
+    particleSpeed = 0.035,
+    vibrationIntensity = 0.003,
+    randomnessFactor = 0.7,
+    beatPulseIntensity = 1.5,
+
+    // Efectos visuales avanzados
+    particleShape = 'square',
+    blendMode = 'normal',
+    trailEffect = 0.0,
+
+    // Datos de audio externos
+    audioData = null
   } = props;
 
   // Referencias principales
@@ -79,15 +143,7 @@ const ChladniSynthesizerOptimized: React.FC<ChladniSynthesizerOptimizedProps> = 
     count: number;
   }>({ position: null, color: null, count: 0 });
 
-  // Referencias Web Worker y OffscreenCanvas
-  const workerRef = useRef<Worker | null>(null);
-  const offscreenCanvasRef = useRef<OffscreenCanvas | null>(null);
-  const isOffscreenSupported = useRef<boolean>(false);
-
-  // Detectar soporte para OffscreenCanvas
-  useEffect(() => {
-    isOffscreenSupported.current = typeof OffscreenCanvas !== 'undefined';
-  }, []);
+  // Referencias Web Worker eliminadas - funcionalidad no implementada
 
   const particlesRef = useRef<Particle[]>([]);
   const chladniParamsRef = useRef<ChladniParams>({ n: initialN, m: initialM });
@@ -100,10 +156,12 @@ const ChladniSynthesizerOptimized: React.FC<ChladniSynthesizerOptimizedProps> = 
   const [sensitivityState, setSensitivity] = useState<number>(sensitivity);
   const [nParam, setNParam] = useState<number>(initialN);
   const [mParam, setMParam] = useState<number>(initialM);
-  const [autoShuffle, setAutoShuffle] = useState<boolean>(false);
+  const [autoShuffle, setAutoShuffle] = useState<boolean>(propAutoShuffle);
   const [selectedColorMode, setSelectedColorMode] = useState<string>(colorMode);
-  const [particleSize, setParticleSize] = useState<number>(2);
-  const [particleOpacity, setParticleOpacity] = useState<number>(0.8);
+  const [particleSize, setParticleSize] = useState<number>(propParticleSize);
+  const [particleOpacity, setParticleOpacity] = useState<number>(propParticleOpacity);
+  const [currentParticleDensity, setCurrentParticleDensity] = useState<'low' | 'medium' | 'high' | 'ultra'>(particleDensity);
+  const [currentCanvasShape, setCurrentCanvasShape] = useState<'square' | 'circle'>(canvasShape);
   const [actualFPS, setActualFPS] = useState<number>(0);
 
   // --- WebGL Shaders ---
@@ -128,14 +186,29 @@ const ChladniSynthesizerOptimized: React.FC<ChladniSynthesizerOptimizedProps> = 
     precision mediump float;
 
     varying vec4 v_color;
+    uniform int u_particleShape; // 0=square, 1=circle, 2=triangle, 3=star
 
     void main() {
       vec2 coord = gl_PointCoord - vec2(0.5, 0.5);
-      if(length(coord) > 0.5) {
-        discard;
+      float dist = length(coord);
+      float alpha = 1.0;
+
+      if (u_particleShape == 1) { // Circle
+        if (dist > 0.5) discard;
+        alpha = 1.0 - smoothstep(0.4, 0.5, dist); // Soft edge
+      } else if (u_particleShape == 2) { // Triangle
+        float angle = atan(coord.y, coord.x);
+        float triangleDist = 0.5 / cos(mod(angle + 3.14159/6.0, 2.0*3.14159/3.0) - 3.14159/6.0);
+        if (dist > triangleDist * 0.8) discard;
+      } else if (u_particleShape == 3) { // Star
+        float angle = atan(coord.y, coord.x);
+        float starRadius = 0.3 + 0.2 * cos(5.0 * angle);
+        if (dist > starRadius) discard;
+      } else if (u_particleShape == 0) { // Square (default)
+        // No discard, keep square shape
       }
 
-      gl_FragColor = v_color;
+      gl_FragColor = vec4(v_color.rgb, v_color.a * alpha);
     }
   `;
 
@@ -184,6 +257,47 @@ const ChladniSynthesizerOptimized: React.FC<ChladniSynthesizerOptimizedProps> = 
     const L = 2; // Espacio de coordenadas [-1, 1]
     return cos(n * PI * x / L) * cos(m * PI * y / L) - cos(m * PI * x / L) * cos(n * PI * y / L);
   };
+
+  // Mapear frecuencia de audio a parámetros Chladni
+  const getChladniParamsFromFrequency = (frequency: number, amplitude: number): { n: number, m: number } => {
+    if (frequency === 0 || amplitude === 0) {
+      // Sin audio, usar parámetros base
+      return { n: nParam, m: mParam };
+    }
+
+    // Mapear frecuencias musicales a patrones Chladni específicos
+    // Usar escalas musicales para mapeos más armónicos
+
+    // Frecuencias de notas musicales (C4 = 261.63 Hz como referencia)
+    const C4 = 261.63;
+    const noteRatio = frequency / C4; // Relación con C4
+
+    // Mapear a octavas musicales (cada octava duplica la frecuencia)
+    const octave = Math.log2(Math.max(noteRatio, 0.1)); // Octava relativa a C4
+
+    // Mapear octavas a parámetros N y M de forma musical
+    // Octavas bajas (graves) -> patrones simples
+    // Octavas altas (agudos) -> patrones complejos
+
+    const baseN = nParam;
+    const baseM = mParam;
+
+    // Escalar basado en octava musical (-3 a +3 octavas aproximadamente)
+    const octaveScale = Math.max(0.3, Math.min(3.0, 1 + octave * 0.5));
+
+    // Modular N basado en frecuencia
+    const modulatedN = Math.max(1, Math.min(20, Math.round(baseN * octaveScale)));
+
+    // Modular M de forma complementaria para crear patrones interesantes
+    // Usar la amplitud para añadir variación
+    const amplitudeScale = 1 + amplitude * 2; // 1.0 a 3.0
+    const modulatedM = Math.max(1, Math.min(20, Math.round(baseM * amplitudeScale / octaveScale)));
+
+    // Asegurar que N y M no sean iguales para patrones más interesantes
+    const finalM = modulatedM === modulatedN ? Math.max(1, modulatedM - 1) : modulatedM;
+
+    return { n: modulatedN, m: finalM };
+  };
   
   // Genera nuevos parámetros aleatorios
   const shuffle = () => {
@@ -204,6 +318,54 @@ const ChladniSynthesizerOptimized: React.FC<ChladniSynthesizerOptimizedProps> = 
   const constrain = (val: number, min: number, max: number) => {
     return Math.max(min, Math.min(max, val));
   };
+
+  // Verificar si una partícula está dentro de los límites de la forma
+  const isInsideShape = (x: number, y: number, shape: string): boolean => {
+    switch (shape) {
+      case 'square':
+        // Canvas cuadrado = cuadrado perfecto sin compensaciones
+        const squareSize = 1.0;
+        return x >= -squareSize && x <= squareSize && y >= -squareSize && y <= squareSize;
+
+      case 'circle':
+        // Canvas cuadrado = círculo perfecto (mismo tamaño que el cuadrado)
+        const circleRadius = 1.0;
+        return (x * x + y * y) <= (circleRadius * circleRadius);
+
+      default:
+        return x >= -1 && x <= 1 && y >= -1 && y <= 1;
+    }
+  };
+
+  // Función removida: getCanvasAspect() - Ya no necesaria con canvas cuadrado
+
+  // Constrainer específico para cada forma (simplificado)
+  const constrainToShape = (x: number, y: number, shape: string): { x: number, y: number } => {
+    switch (shape) {
+      case 'square':
+        // Canvas cuadrado = cuadrado perfecto
+        const squareSize = 1.0;
+        return {
+          x: constrain(x, -squareSize, squareSize),
+          y: constrain(y, -squareSize, squareSize)
+        };
+
+      case 'circle':
+        // Canvas cuadrado = círculo perfecto (mismo tamaño que el cuadrado)
+        const circleRadius = 1.0;
+        const distance = Math.sqrt(x * x + y * y);
+        if (distance > circleRadius) {
+          const factor = circleRadius / distance;
+          return { x: x * factor, y: y * factor };
+        }
+        return { x, y };
+
+      default:
+        return { x: constrain(x, -1, 1), y: constrain(y, -1, 1) };
+    }
+  };
+
+  // Función applyBoundaryForce() eliminada - no se usaba
 
   // --- Inicialización WebGL ---
   const initWebGL = (canvas: HTMLCanvasElement): boolean => {
@@ -341,108 +503,7 @@ const ChladniSynthesizerOptimized: React.FC<ChladniSynthesizerOptimizedProps> = 
     return [r, g, b, alpha];
   };
 
-  // --- Web Worker Functions ---
-  const initWorker = (): boolean => {
-    try {
-      if (!useWorker || !isOffscreenSupported.current) {
-        return false;
-      }
-
-      const canvas = canvasRef.current;
-      if (!canvas) return false;
-
-      // Create OffscreenCanvas
-      const offscreen = canvas.transferControlToOffscreen();
-      offscreenCanvasRef.current = offscreen;
-
-      // Create Worker
-      const worker = new Worker('/chladni-worker.js');
-      workerRef.current = worker;
-
-      // Set up worker message handler
-      worker.onmessage = (event) => {
-        const { type, data } = event.data;
-
-        switch (type) {
-          case 'initialized':
-            console.log('Worker WebGL initialized');
-            // Send initial particles
-            worker.postMessage({
-              type: 'setParticles',
-              data: particlesRef.current
-            });
-            // Start animation
-            worker.postMessage({ type: 'start' });
-            break;
-
-          case 'requestAudioData':
-            // Send audio data to worker
-            let audioInfluence = 0;
-            let frequencyData: Uint8Array | null = null;
-
-            if (isPlaying && audioDataRef.current) {
-              audioDataRef.current.analyzer.getByteFrequencyData(audioDataRef.current.dataArray);
-              frequencyData = audioDataRef.current.dataArray;
-
-              const sum = frequencyData.reduce((acc, val) => acc + val, 0);
-              audioInfluence = sum / frequencyData.length / 255 * (sensitivityState / 50);
-            }
-
-            worker.postMessage({
-              type: 'audioData',
-              data: { audioInfluence, frequencyData }
-            });
-            break;
-
-          case 'error':
-            console.error('Worker error:', data);
-            break;
-        }
-      };
-
-      worker.onerror = (error) => {
-        console.error('Worker error:', error);
-      };
-
-      // Initialize worker
-      worker.postMessage({
-        type: 'init',
-        data: {
-          canvas: offscreen,
-          particleSize,
-          particleOpacity,
-          colorMode: selectedColorMode
-        }
-      }, [offscreen]);
-
-      return true;
-    } catch (error) {
-      console.error('Error initializing worker:', error);
-      return false;
-    }
-  };
-
-  const updateWorkerSettings = () => {
-    if (workerRef.current) {
-      workerRef.current.postMessage({
-        type: 'updateSettings',
-        data: {
-          particleSize,
-          particleOpacity,
-          colorMode: selectedColorMode
-        }
-      });
-    }
-  };
-
-  const updateWorkerParams = () => {
-    if (workerRef.current) {
-      workerRef.current.postMessage({
-        type: 'updateParams',
-        data: chladniParamsRef.current
-      });
-    }
-  };
+  // Web Worker functions eliminadas - funcionalidad no implementada
 
   // Inicializar audio context y analizador
   const initAudio = async () => {
@@ -583,9 +644,24 @@ const ChladniSynthesizerOptimized: React.FC<ChladniSynthesizerOptimizedProps> = 
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Clear canvas
-    gl.clearColor(0, 0, 0, 1);
-    gl.clear(gl.COLOR_BUFFER_BIT);
+    // Clear canvas with trail effect
+    if (trailEffect > 0) {
+      // Partial clear for trail effect
+      gl.clearColor(0, 0, 0, trailEffect);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+
+      // Draw a semi-transparent overlay to create fade effect
+      gl.enable(gl.BLEND);
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+      // Create a full-screen quad with low alpha to fade previous frame
+      const fadeAlpha = trailEffect * 0.1; // Adjust fade rate
+      gl.clearColor(0, 0, 0, fadeAlpha);
+    } else {
+      // Normal clear
+      gl.clearColor(0, 0, 0, 1);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+    }
 
     if (particles.length === 0) return;
 
@@ -643,6 +719,7 @@ const ChladniSynthesizerOptimized: React.FC<ChladniSynthesizerOptimizedProps> = 
     // Set up uniforms
     const matrixLocation = gl.getUniformLocation(program, "u_matrix");
     const pointSizeLocation = gl.getUniformLocation(program, "u_pointSize");
+    const particleShapeLocation = gl.getUniformLocation(program, "u_particleShape");
 
     // Create transformation matrix (identity for now)
     const matrix = [
@@ -653,10 +730,32 @@ const ChladniSynthesizerOptimized: React.FC<ChladniSynthesizerOptimizedProps> = 
 
     gl.uniformMatrix3fv(matrixLocation, false, matrix);
 
-    // Adjust point size based on beat detection
+    // Set particle shape
+    const shapeValue = particleShape === 'square' ? 0 :
+                      particleShape === 'circle' ? 1 :
+                      particleShape === 'triangle' ? 2 :
+                      particleShape === 'star' ? 3 : 0;
+    gl.uniform1i(particleShapeLocation, shapeValue);
+
+    // Set blend mode
+    gl.enable(gl.BLEND);
+    switch (blendMode) {
+      case 'additive':
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+        break;
+      case 'multiply':
+        gl.blendFunc(gl.DST_COLOR, gl.ZERO);
+        break;
+      case 'normal':
+      default:
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        break;
+    }
+
+    // Adjust point size based on beat detection (ahora configurable)
     let finalPointSize = particleSize;
     if (beatDetected) {
-      finalPointSize *= 1.5;
+      finalPointSize *= beatPulseIntensity;
     }
 
     gl.uniform1f(pointSizeLocation, finalPointSize);
@@ -665,22 +764,54 @@ const ChladniSynthesizerOptimized: React.FC<ChladniSynthesizerOptimizedProps> = 
     gl.drawArrays(gl.POINTS, 0, buffers.count);
   };
 
+  // Generar posición aleatoria dentro de la forma (simplificado)
+  const generateRandomPositionInShape = (shape: string): { x: number, y: number } => {
+    switch (shape) {
+      case 'square':
+        // Canvas cuadrado = cuadrado perfecto
+        const squareSize = 1.0;
+        return {
+          x: (Math.random() * 2 - 1) * squareSize,
+          y: (Math.random() * 2 - 1) * squareSize
+        };
+
+      case 'circle':
+        // Canvas cuadrado = círculo perfecto (mismo tamaño que el cuadrado)
+        const angle = Math.random() * 2 * Math.PI;
+        const radius = Math.sqrt(Math.random()) * 1.0; // sqrt para distribución uniforme
+        return {
+          x: Math.cos(angle) * radius,
+          y: Math.sin(angle) * radius
+        };
+
+      default:
+        return {
+          x: Math.random() * 2 - 1,
+          y: Math.random() * 2 - 1
+        };
+    }
+  };
+
   // Crear partículas
   const createParticles = useCallback(() => {
-    const particleCount = PARTICLE_DENSITY[particleDensity];
+    const particleCount = PARTICLE_DENSITY[currentParticleDensity];
+    console.log(`🔄 Creando ${particleCount} partículas (densidad: ${currentParticleDensity}, forma: ${currentCanvasShape})`);
+
     const newParticles: Particle[] = [];
 
     for (let i = 0; i < particleCount; i++) {
+      const position = generateRandomPositionInShape(currentCanvasShape);
       newParticles.push({
-        x: Math.random() * 2 - 1, // [-1, 1]
-        y: Math.random() * 2 - 1, // [-1, 1]
+        x: position.x,
+        y: position.y,
         color: `rgba(255, 255, 255, ${particleOpacity})`
       });
     }
 
     particlesRef.current = newParticles;
+    console.log(`✅ Partículas creadas: ${particlesRef.current.length} en forma ${currentCanvasShape}`);
     return newParticles;
-  }, [particleDensity, particleOpacity]);
+  }, [currentParticleDensity, currentCanvasShape, particleOpacity]);
 
   // Función principal de renderizado
   const renderFrame = useCallback(() => {
@@ -722,33 +853,158 @@ const ChladniSynthesizerOptimized: React.FC<ChladniSynthesizerOptimizedProps> = 
     if (width === 0 || height === 0) return;
     
     const particles = particlesRef.current;
-    
+
+    // Log ocasional para debug (cada 60 frames)
+    if (frameCountRef.current % 60 === 0) {
+      console.log(`🎬 Renderizando ${particles.length} partículas (frame ${frameCountRef.current})`);
+    }
+
     // Actualizar partículas basado en audio si está disponible
     let audioInfluence = 0;
     let frequencyData: Uint8Array | null = null;
-    
-    if (isPlaying && audioDataRef.current) {
+    let dominantFrequency = 0;
+
+    // Priorizar datos de audio externos (ej. del piano) sobre audio interno
+    if (audioData && audioData.averageAmplitude > 0) {
+      // Usar datos de audio externos (piano virtual)
+      frequencyData = audioData.frequencyData;
+      dominantFrequency = audioData.dominantFrequency;
+      audioInfluence = audioData.averageAmplitude * (sensitivityState / 50);
+
+      console.log('🎹 Usando datos de piano:', {
+        frequency: dominantFrequency.toFixed(1),
+        amplitude: audioData.averageAmplitude.toFixed(3),
+        influence: audioInfluence.toFixed(3)
+      });
+    } else if (isPlaying && audioDataRef.current) {
+      // Usar audio interno (micrófono/archivo)
       audioDataRef.current.analyzer.getByteFrequencyData(audioDataRef.current.dataArray);
       frequencyData = audioDataRef.current.dataArray;
 
       // Calcular amplitud promedio
       const sum = Array.from(frequencyData).reduce((acc, val) => acc + val, 0);
-      audioInfluence = sum / frequencyData.length / 255 * (sensitivityState / 50);
+      const rawInfluence = sum / frequencyData.length / 255;
+
+      // Calcular frecuencia dominante
+      let maxValue = 0;
+      let maxIndex = 0;
+      for (let i = 0; i < frequencyData.length; i++) {
+        if (frequencyData[i] > maxValue) {
+          maxValue = frequencyData[i];
+          maxIndex = i;
+        }
+      }
+      const sampleRate = audioContextRef.current?.sampleRate || 44100;
+      dominantFrequency = maxIndex * sampleRate / (2048); // FFT_SIZE
+
+      // Solo aplicar influencia si hay amplitud significativa
+      audioInfluence = rawInfluence > 0.01 ? rawInfluence * (sensitivityState / 50) : 0;
     } else {
-      // Simular movimiento suave sin audio para testing y visualización
-      audioInfluence = 0.1 + Math.sin(Date.now() * 0.001) * 0.05;
-    }
-    
-    // Si está usando Worker, no renderizar en main thread
-    if (useWorker && workerRef.current) {
-      return; // Worker maneja el renderizado
+      // Sin audio = sin movimiento (estado de reposo)
+      audioInfluence = 0;
+      dominantFrequency = 0;
     }
 
-    // Decidir entre WebGL y Canvas 2D en main thread
+    // Lógica de Worker eliminada - renderizado siempre en main thread
+
+    // ===== ACTUALIZAR PARTÍCULAS (común para WebGL y Canvas 2D) =====
+    // Obtener parámetros Chladni modulados por frecuencia de audio
+    const audioModulatedParams = getChladniParamsFromFrequency(dominantFrequency, audioInfluence);
+    const { n, m } = audioInfluence > 0 ? audioModulatedParams : chladniParamsRef.current;
+
+    // Debug logging para verificar modulación de parámetros
+    if (audioInfluence > 0 && frameCountRef.current % 30 === 0) {
+      console.log('🌊 Parámetros Chladni modulados:', {
+        frequency: dominantFrequency.toFixed(1),
+        amplitude: audioInfluence.toFixed(3),
+        originalN: chladniParamsRef.current.n,
+        originalM: chladniParamsRef.current.m,
+        modulatedN: n,
+        modulatedM: m
+      });
+    }
+
+    // Actualizar posiciones de partículas usando lógica Chladni
+    particles.forEach(p => {
+      // Guardar posición original
+      const originalX = p.x;
+      const originalY = p.y;
+
+      // Lógica de actualización de partículas con influencia de audio (ahora configurable)
+      const speed = audioInfluence > 0 ? particleSpeed * (1 + audioInfluence) : 0;
+      const vibrationMax = audioInfluence > 0 ? vibrationIntensity * (1 + audioInfluence * 2) : 0;
+      const vibrationX = audioInfluence > 0 ? Math.random() * 2 * vibrationMax - vibrationMax : 0;
+      const vibrationY = audioInfluence > 0 ? Math.random() * 2 * vibrationMax - vibrationMax : 0;
+      const randomNum = audioInfluence > 0 ? Math.random() * randomnessFactor - (randomnessFactor * 0.3) : 0;
+
+      const amount = chladni(p.x, p.y, n, m);
+
+      // Calcular nueva posición propuesta
+      let newX = p.x;
+      let newY = p.y;
+
+      // Descenso estocástico de gradiente con influencia de audio
+      if (amount >= 0) {
+        if (chladni(p.x + vibrationMax, p.y, n, m) >= amount) {
+          newX -= randomNum * amount * speed + vibrationX;
+        } else {
+          newX += randomNum * amount * speed + vibrationX;
+        }
+        if (chladni(p.x, p.y + vibrationMax, n, m) >= amount) {
+          newY -= randomNum * amount * speed + vibrationY;
+        } else {
+          newY += randomNum * amount * speed + vibrationY;
+        }
+      } else { // amount < 0
+        if (chladni(p.x + vibrationMax, p.y, n, m) <= amount) {
+          newX += randomNum * amount * speed + vibrationX;
+        } else {
+          newX -= randomNum * amount * speed + vibrationX;
+        }
+        if (chladni(p.x, p.y + vibrationMax, n, m) <= amount) {
+          newY += randomNum * amount * speed + vibrationY;
+        } else {
+          newY -= randomNum * amount * speed + vibrationY;
+        }
+      }
+
+      // VERIFICAR si la nueva posición está dentro de los límites ANTES de aplicarla
+      if (isInsideShape(newX, newY, currentCanvasShape)) {
+        // Si está dentro, usar la nueva posición
+        p.x = newX;
+        p.y = newY;
+      } else {
+        // Si se sale, mantener la posición original y aplicar restricción suave
+        const constrained = constrainToShape(newX, newY, currentCanvasShape);
+        p.x = constrained.x;
+        p.y = constrained.y;
+
+        // Log para debug
+        if (Math.random() < 0.01) {
+          console.log(`🔷 Movimiento BLOQUEADO: (${originalX.toFixed(2)}, ${originalY.toFixed(2)}) -> (${newX.toFixed(2)}, ${newY.toFixed(2)}) [${currentCanvasShape}]`);
+        }
+      }
+
+      // Actualizar color basado en datos de frecuencia de audio
+      if (frequencyData && isPlaying && audioInfluence > 0) {
+        // Mapear posición de partícula a bin de frecuencia
+        const binIndex = Math.floor(Math.abs(p.x + p.y + 2) / 4 * (frequencyData.length - 1));
+        const value = frequencyData[binIndex];
+
+        // Intensificar el color basado en la influencia del audio
+        const intensityMultiplier = 1 + audioInfluence * 3; // Hacer más brillante con audio
+        p.color = getColorFromFrequency(Math.min(255, value * intensityMultiplier), 255);
+      } else {
+        // Sin audio = color base blanco
+        p.color = `rgba(255, 255, 255, ${particleOpacity})`;
+      }
+    });
+
+    // Decidir entre WebGL y Canvas 2D para renderizado
     const useWebGLRendering = useWebGL && glRef.current && programRef.current;
 
     if (useWebGLRendering) {
-      // Renderizado WebGL
+      // Renderizado WebGL (partículas ya actualizadas)
       renderWebGL(particles, audioInfluence, frequencyData);
       return;
     }
@@ -760,70 +1016,19 @@ const ChladniSynthesizerOptimized: React.FC<ChladniSynthesizerOptimizedProps> = 
     // Limpiar canvas
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, width, height);
-    
-    // Actualizar partículas
-    const { n, m } = chladniParamsRef.current;
-    
+
     ctx.save();
     ctx.translate(width / 2, height / 2);
     const scale = Math.min(width, height) / 2.0;
-    
-    // Efecto de pulso para beat detection
+
+    // Efecto de pulso para beat detection (ahora configurable)
     let particleSizeMultiplier = 1.0;
     if (beatDetected) {
-      particleSizeMultiplier = 1.5;
+      particleSizeMultiplier = beatPulseIntensity;
     }
-    
-    // Actualizar y dibujar cada partícula
+
+    // Solo dibujar partículas (ya actualizadas anteriormente)
     particles.forEach(p => {
-      // Lógica de actualización de partículas con influencia de audio
-      const speed = 0.035 * (1 + audioInfluence);
-      const vibrationMax = 0.003 * (1 + audioInfluence * 2);
-      const vibrationX = Math.random() * 2 * vibrationMax - vibrationMax;
-      const vibrationY = Math.random() * 2 * vibrationMax - vibrationMax;
-      const randomNum = Math.random() * 0.7 - 0.2;
-      
-      const amount = chladni(p.x, p.y, n, m);
-      
-      // Descenso estocástico de gradiente con influencia de audio
-      if (amount >= 0) {
-        if (chladni(p.x + vibrationMax, p.y, n, m) >= amount) {
-          p.x -= randomNum * amount * speed + vibrationX;
-        } else {
-          p.x += randomNum * amount * speed + vibrationX;
-        }
-        if (chladni(p.x, p.y + vibrationMax, n, m) >= amount) {
-          p.y -= randomNum * amount * speed + vibrationY;
-        } else {
-          p.y += randomNum * amount * speed + vibrationY;
-        }
-      } else { // amount < 0
-        if (chladni(p.x + vibrationMax, p.y, n, m) <= amount) {
-          p.x += randomNum * amount * speed + vibrationX;
-        } else {
-          p.x -= randomNum * amount * speed + vibrationX;
-        }
-        if (chladni(p.x, p.y + vibrationMax, n, m) <= amount) {
-          p.y += randomNum * amount * speed + vibrationY;
-        } else {
-          p.y -= randomNum * amount * speed + vibrationY;
-        }
-      }
-      
-      // Mantener partículas dentro de los límites
-      p.x = constrain(p.x, -1, 1);
-      p.y = constrain(p.y, -1, 1);
-      
-      // Color basado en datos de frecuencia de audio
-      if (frequencyData && isPlaying) {
-        // Mapear posición de partícula a bin de frecuencia
-        const binIndex = Math.floor(Math.abs(p.x + p.y + 2) / 4 * (frequencyData.length - 1));
-        const value = frequencyData[binIndex];
-        p.color = getColorFromFrequency(value, 255);
-      } else {
-        p.color = `rgba(255, 255, 255, ${particleOpacity})`;
-      }
-      
       // Dibujar partícula
       ctx.fillStyle = p.color;
       const finalSize = particleSize * particleSizeMultiplier;
@@ -831,7 +1036,7 @@ const ChladniSynthesizerOptimized: React.FC<ChladniSynthesizerOptimizedProps> = 
     });
     
     ctx.restore();
-  }, [isPlaying, audioSource, sensitivityState, particleSize, particleOpacity, selectedColorMode, autoShuffle, fpsLimit, beatDetected, useWebGL, useWorker]);
+  }, [isPlaying, audioSource, sensitivityState, particleSize, particleOpacity, selectedColorMode, autoShuffle, fpsLimit, beatDetected, useWebGL]);
 
   // Efecto para inicialización
   useEffect(() => {
@@ -844,7 +1049,17 @@ const ChladniSynthesizerOptimized: React.FC<ChladniSynthesizerOptimizedProps> = 
     }
 
     // Crear partículas iniciales
-    createParticles();
+    const initialParticleCount = PARTICLE_DENSITY[currentParticleDensity];
+    console.log(`🚀 Inicializando con ${initialParticleCount} partículas (densidad: ${currentParticleDensity})`);
+    const initialParticles: Particle[] = [];
+    for (let i = 0; i < initialParticleCount; i++) {
+      initialParticles.push({
+        x: Math.random() * 2 - 1,
+        y: Math.random() * 2 - 1,
+        color: `rgba(255, 255, 255, ${particleOpacity})`
+      });
+    }
+    particlesRef.current = initialParticles;
 
     // Configurar redimensionamiento
     const resizeCanvas = () => {
@@ -887,12 +1102,7 @@ const ChladniSynthesizerOptimized: React.FC<ChladniSynthesizerOptimizedProps> = 
         cancelAnimationFrame(animationFrameId.current);
       }
       
-      // Limpiar Web Worker
-      if (workerRef.current) {
-        workerRef.current.postMessage({ type: 'stop' });
-        workerRef.current.terminate();
-        workerRef.current = null;
-      }
+      // Lógica de limpieza de Worker eliminada
       
       // Limpiar recursos de audio
       if (audioDataRef.current && audioDataRef.current.source) {
@@ -903,7 +1113,7 @@ const ChladniSynthesizerOptimized: React.FC<ChladniSynthesizerOptimizedProps> = 
         audioContextRef.current.close();
       }
     };
-  }, [createParticles, renderFrame, useWebGL, useWorker]);
+  }, [renderFrame, useWebGL]);
   
   // Efecto para detección de beat
   useEffect(() => {
@@ -912,19 +1122,88 @@ const ChladniSynthesizerOptimized: React.FC<ChladniSynthesizerOptimizedProps> = 
     }
   }, [beatDetected, autoShuffle]);
 
-  // Efecto para actualizar configuraciones del Worker
-  useEffect(() => {
-    updateWorkerSettings();
-  }, [particleSize, particleOpacity, selectedColorMode]);
+  // useEffects de Worker eliminados - funcionalidad no implementada
 
-  // Efecto para actualizar parámetros Chladni del Worker
+  // Efectos para sincronizar props con estados internos
   useEffect(() => {
-    updateWorkerParams();
-  }, [nParam, mParam]);
+    setParticleSize(propParticleSize);
+  }, [propParticleSize]);
+
+  useEffect(() => {
+    setParticleOpacity(propParticleOpacity);
+  }, [propParticleOpacity]);
+
+  useEffect(() => {
+    setAutoShuffle(propAutoShuffle);
+  }, [propAutoShuffle]);
+
+  useEffect(() => {
+    setSelectedColorMode(colorMode);
+  }, [colorMode]);
+
+  useEffect(() => {
+    console.log(`🔷 Forma del canvas cambió a: ${canvasShape}`);
+    setCurrentCanvasShape(canvasShape);
+
+    // Aplicar clase CSS para cambiar la forma visual
+    if (canvasRef.current) {
+      console.log(`🎨 Aplicando clase CSS: canvas-shape-${canvasShape}`);
+      canvasRef.current.className = `industrial-canvas canvas-shape-${canvasShape}`;
+    }
+  }, [canvasShape]);
+
+  // Efecto para recrear partículas cuando cambie la forma del canvas
+  useEffect(() => {
+    console.log(`🔷 Recreando partículas para nueva forma: ${currentCanvasShape}`);
+    createParticles();
+
+    // Actualizar clase CSS cuando cambie currentCanvasShape
+    if (canvasRef.current) {
+      console.log(`🎨 Actualizando clase CSS: canvas-shape-${currentCanvasShape}`);
+      canvasRef.current.className = `industrial-canvas canvas-shape-${currentCanvasShape}`;
+    }
+  }, [currentCanvasShape, createParticles]);
+
+  // Efecto para sincronizar prop con estado interno
+  useEffect(() => {
+    console.log(`🎯 Prop particleDensity cambió a: ${particleDensity}`);
+    setCurrentParticleDensity(particleDensity);
+  }, [particleDensity]);
+
+  // Efecto para recrear partículas cuando cambie la densidad interna
+  useEffect(() => {
+    console.log(`🔄 Estado interno de densidad cambió a: ${currentParticleDensity}`);
+    createParticles();
+  }, [currentParticleDensity, createParticles]);
 
   return (
     <div className="industrial-chladni-container">
-      <canvas ref={canvasRef} className="industrial-canvas" />
+      <canvas
+        ref={canvasRef}
+        className={`industrial-canvas canvas-shape-${currentCanvasShape}`}
+      />
+
+      {/* Debug info overlay (solo en desarrollo) */}
+      {process.env.NODE_ENV === 'development' && (
+        <div style={{
+          position: 'absolute',
+          top: '10px',
+          left: '10px',
+          background: 'rgba(0,0,0,0.7)',
+          color: 'white',
+          padding: '8px',
+          borderRadius: '4px',
+          fontSize: '12px',
+          fontFamily: 'monospace'
+        }}>
+          <div>Partículas: {particlesRef.current.length.toLocaleString()}</div>
+          <div>Densidad: {currentParticleDensity} ({PARTICLE_DENSITY[currentParticleDensity].toLocaleString()})</div>
+          <div>Forma: {currentCanvasShape}</div>
+          <div>FPS: {actualFPS}</div>
+          <div>WebGL: {useWebGL ? 'ON' : 'OFF'}</div>
+          <div>Frame: {frameCountRef.current}</div>
+        </div>
+      )}
     </div>
   );
 };
